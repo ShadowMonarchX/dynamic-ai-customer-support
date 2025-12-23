@@ -100,52 +100,98 @@ GEN --> OUT[Final Customer Response]
 ```mermaid
 
 graph TD
-    UQ[User Query] --> CI[Client ID Validation]
-    CI --> IS[Intent Segmentation]
 
-    IS --> PL[Planner / Orchestration State]
+%% =========================
+%% ENTRY & GOVERNANCE LAYER
+%% =========================
+UQ[User Query] --> CI[Client / Tenant Identity Validation]
+CI --> AB[Authorization & Access Boundary Check]
+AB --> IS[Intent Segmentation & Query Decomposition]
 
-    PL --> AE[Authority & Tenant Boundary Enforcement]
+%% =========================
+%% PLANNING & ORCHESTRATION
+%% =========================
+IS --> PL[Planner / Orchestration State]
+PL --> GM[Goal Modeling & Sub-Task Planning]
+PL --> HM[Historical Memory & Prior Feedback]
+HM --> PL
 
-    AE --> MSR[Multi-Source Retrieval]
-    MSR --> PD[Product Data]
-    MSR --> ID[Inventory Data]
-    MSR --> PR[Pricing Data]
-    MSR --> DL[Delivery Timelines]
-    MSR --> PO[Policies & FAQs]
+PL --> AE[Authority & Tenant Boundary Enforcement]
 
-    PD & ID & PR & DL & PO --> MA[Multi-Agent RAG Layer]
+%% =========================
+%% MULTI-SOURCE RETRIEVAL
+%% =========================
+AE --> MSR[Multi-Source Retrieval Layer]
 
-    MA --> DA[Domain Reasoning Agent]
-    MA --> PA[Policy & Compliance Agent]
-    MA --> FA[Feasibility Agent]
-    MA --> CA[Consistency Agent]
-    MA --> EA[Ethics & Risk Agent]
+MSR --> PD[Product Knowledge Corpus]
+MSR --> ID[Inventory & Availability State]
+MSR --> PR[Pricing & Commercial Rules]
+MSR --> DL[Logistics & Delivery Constraints]
+MSR --> PO[Policies, FAQs & Compliance Texts]
+MSR --> EK[External Reference Knowledge]
 
-    DA & PA & FA & CA & EA --> CS[Context Synthesis]
+PD & ID & PR & DL & PO & EK --> RC[Retrieved Context Pool]
 
-    CS --> CR[Conflict Resolution]
-    CR --> UF[Unified Grounded Context]
+%% =========================
+%% MULTI-AGENT RAG LAYER
+%% =========================
+RC --> MA[Multi-Agent Reasoning Fabric]
 
-    UF --> GE[Grounded Generation Engine]
+MA --> DA[Domain Expertise Agent]
+MA --> PA[Policy & Compliance Agent]
+MA --> FA[Feasibility & Constraint Agent]
+MA --> CA[Consistency & Cross-Check Agent]
+MA --> EA[Ethics, Safety & Risk Agent]
 
-    GE --> EV[Evaluation & Validation Layer]
+DA --> DF[Domain Findings]
+PA --> PF[Policy Findings]
+FA --> FF[Feasibility Findings]
+CA --> CF[Consistency Findings]
+EA --> EF[Ethical Risk Findings]
 
-    EV --> AC[Accuracy Check]
-    EV --> FF[Faithfulness Check]
-    EV --> PC[Policy Compliance Check]
-    EV --> UT[User Tone & Clarity Check]
+DF & PF & FF & CF & EF --> CS[Context Synthesis Layer]
 
-    AC & FF & PC & UT --> DG[Diagnostic Agent]
+%% =========================
+%% CONTEXT SYNTHESIS
+%% =========================
+CS --> CR[Conflict Detection & Resolution]
+CR --> UC[Uncertainty & Gap Annotation]
+UC --> UF[Unified Evidence-Grounded Context]
 
-    DG --> SOP[Self-Improving SOP & Rule Evolution]
+%% =========================
+%% GENERATION LAYER
+%% =========================
+UF --> GE[Grounded Generation Engine]
+GE --> RS[Response Structuring & Explanation Framing]
 
-    SOP --> PL
+%% =========================
+%% EVALUATION & MONITORING
+%% =========================
+RS --> EV[Evaluation & Monitoring Layer]
 
-    EV -->|If Context Insufficient| FB[Fallback Response]
-    FB --> OUT[Final Customer Response]
+EV --> AC[Contextual Accuracy Assessment]
+EV --> FF2[Faithfulness to Retrieved Evidence]
+EV --> PC[Policy & Compliance Alignment]
+EV --> UT[User Clarity, Tone & Intent Match]
 
-    GE --> OUT
+AC & FF2 & PC & UT --> DG[Diagnostic & Root-Cause Agent]
+
+%% =========================
+%% SELF-IMPROVEMENT LOOP
+%% =========================
+DG --> WL[Weakest-Link Identification]
+WL --> SOP[Self-Improving SOP & Rule Evolution]
+SOP --> PL
+SOP --> MSR
+SOP --> MA
+
+%% =========================
+%% FALLBACK & OUTPUT
+%% =========================
+EV -->|Context Insufficient| FB[Fallback & Safe Response Strategy]
+FB --> OUT[Final User Response]
+
+GE --> OUT
 
 
 ```
