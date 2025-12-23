@@ -46,7 +46,7 @@ class Preprocessor:
 # Example usage
 from .data_load import DataSource
 
-source = DataSource("training_data.txt")
+source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
 source.load_data()
 texts = source.get_data()
 

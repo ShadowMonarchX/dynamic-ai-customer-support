@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 
-data_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "training_data.txt"))
+data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
 if not os.path.exists(data_path):
     raise FileNotFoundError(f"training_data.txt not found at: {data_path}")

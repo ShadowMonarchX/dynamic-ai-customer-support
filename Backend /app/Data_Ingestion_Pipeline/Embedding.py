@@ -1,8 +1,9 @@
-from .preprocessing import Preprocessor, DataSource
+from .data_load import DataSource
+from .preprocessing import Preprocessor
 from sentence_transformers import SentenceTransformer
 
 # Load text data
-source = DataSource("training_data.txt")
+source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
 source.load_data()
 texts = source.get_data()
 

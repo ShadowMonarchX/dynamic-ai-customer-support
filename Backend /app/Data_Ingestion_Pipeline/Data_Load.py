@@ -99,7 +99,7 @@ class DataSource:
         return self.data
 
 
-file_path = 'training_data.txt'
+file_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 source = DataSource(file_path)
 source.load_data()
 texts = source.get_data()
