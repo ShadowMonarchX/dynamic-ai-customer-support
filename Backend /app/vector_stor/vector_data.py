@@ -4,9 +4,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from data_ingestion_pipeline.preprocessing import Preprocessor
 from data_ingestion_pipeline.data_load import DataSource
-from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
+from sentence_transformers import SentenceTransformer # type: ignore
+import faiss # type: ignore
+import numpy as np # type: ignore
 
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
