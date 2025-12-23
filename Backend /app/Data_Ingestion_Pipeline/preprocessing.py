@@ -1,8 +1,8 @@
 from Data_Load import DataSource
 import re
 import string
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize # type: ignore
+from nltk.corpus import stopwords # type: ignore
 
 class Preprocessor:
     def __init__(self, texts):

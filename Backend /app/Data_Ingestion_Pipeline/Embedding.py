@@ -1,7 +1,7 @@
 from preprocessing import Preprocessor, DataSource
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer # type: ignore
 
-class Embedder:
+class Embedded:
     def __init__(self, texts, model_name="all-MiniLM-L6-v2"):
         self.texts = texts
         self.model = SentenceTransformer(model_name)
@@ -22,9 +22,9 @@ processor = Preprocessor(texts)
 processor.preprocess()
 processed_texts = processor.get_processed()
 
-embedder = Embedder(processed_texts)
-embedder.generate_embeddings()
-vectors = embedder.get_embeddings()
+embedded = Embedded(processed_texts)
+embedded.generate_embeddings()
+vectors = embedded.get_embeddings()
 
 for v in vectors:
     print(v)
