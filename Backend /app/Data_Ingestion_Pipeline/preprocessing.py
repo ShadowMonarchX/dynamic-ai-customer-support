@@ -44,7 +44,7 @@ class Preprocessor:
 
 
 # Example usage
-from Data_Load import DataSource
+from .data_load import DataSource
 
 source = DataSource("training_data.txt")
 source.load_data()

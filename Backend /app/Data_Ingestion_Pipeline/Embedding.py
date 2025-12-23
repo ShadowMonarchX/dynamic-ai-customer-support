@@ -1,4 +1,4 @@
-from preprocessing import Preprocessor, DataSource
+from .preprocessing import Preprocessor, DataSource
 from sentence_transformers import SentenceTransformer
 
 # Load text data
@@ -9,8 +9,7 @@ texts = source.get_data()
 # Preprocess
 processor = Preprocessor(texts)
 processor.preprocess()
-processed_texts = processor.get_processed()  # <-- use get_processed(), not get_data()
-
+processed_texts = processor.get_processed()  
 class Embedded:
     def __init__(self, texts, model_name="all-MiniLM-L6-v2"):
         self.texts = texts
@@ -33,5 +32,6 @@ print("----------------------------------")
 print("Generated Embeddings:")
 print("----------------------------------")
 print("\n")
+
 for v in vectors:
     print(v)
