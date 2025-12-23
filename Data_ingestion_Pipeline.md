@@ -3,7 +3,7 @@
 graph TD
 
 %% =========================
-%% RAG DATA INGESTION PIPELINE
+%% RAG DATA INGESTION PIPELINE (GitHub Compatible)
 %% =========================
 
 SRC[Data Sources] --> CL[Data Classification Layer]
@@ -11,54 +11,45 @@ SRC[Data Sources] --> CL[Data Classification Layer]
 %% =========================
 %% DATA TYPE SEGMENTATION
 %% =========================
-CL --> ST1[Static / Semi-Static Sources]
-CL --> ST2[High-Frequency Dynamic Sources]
-CL --> ST3[Low-Frequency Dynamic Sources]
+CL --> ST1[Stable Knowledge Pipeline<br>Long-Lived, High-Trust Knowledge]
+CL --> ST2[Operational Knowledge Pipeline<br>Moderately Changing, Business-Critical]
+CL --> ST3[Live & Contextual Data Pipeline<br>Fast-Changing, Personalized]
 
 %% =========================
-%% 1. STATIC / SEMI-STATIC DATA
+%% 1. STABLE KNOWLEDGE PIPELINE
 %% =========================
-ST1 --> WP[Web Pages & Public Links]
-ST1 --> DOC[Documents, PDFs, Manuals]
+ST1 --> WP[Web Pages, Reference Docs, Manuals, Policies]
+ST1 --> DOC[Instructional & Legal Documents]
 ST1 --> KB[Knowledge Bases & Wikis]
 
-WP --> SCHED1[Event-Based or Manual Refresh]
-DOC --> SCHED1
-KB --> SCHED1
-
+WP & DOC & KB --> SCHED1[Event-Based or Rare Manual Refresh]
 SCHED1 --> CLEAN1[Cleaning & Normalization]
-CLEAN1 --> SEM1[Semantic Structuring]
-SEM1 --> STORE1[Long-Term Knowledge Store]
+CLEAN1 --> SEM1[Semantic Conditioning / Structuring]
+SEM1 --> STORE1[Long-Lived Knowledge Store<br>Change Frequency: Months / Years]
 
 %% =========================
-%% 2. HIGH-FREQUENCY DYNAMIC DATA
+%% 2. OPERATIONAL KNOWLEDGE PIPELINE
 %% =========================
-ST2 --> RT[Real-Time Operational Data]
-ST2 --> INV[Inventory / Availability]
-ST2 --> PRICE[Pricing & Market Signals]
+ST2 --> PROD[Product Metadata & Features]
+ST2 --> PRICE[Pricing, Plans & Discounts]
+ST2 --> FAQ[FAQs, Help Content & Business Rules]
 
-RT --> SCHED2[Continuous / Near-Real-Time Sync]
-INV --> SCHED2
-PRICE --> SCHED2
-
-SCHED2 --> VALID2[Freshness & Consistency Validation]
-VALID2 --> SEM2[Temporal Semantic Encoding]
-SEM2 --> STORE2[Short-Lived / Volatile Knowledge Store]
+PROD & PRICE & FAQ --> SCHED2[Scheduled / Batch Re-Conditioning]
+SCHED2 --> CLEAN2[Data Cleaning & Normalization]
+CLEAN2 --> SEM2[Semantic Encoding & Relevance Shaping]
+SEM2 --> STORE2[Mid-Lived Knowledge Store<br>Change Frequency: Weekly / Monthly]
 
 %% =========================
-%% 3. LOW-FREQUENCY DYNAMIC DATA
+%% 3. LIVE & CONTEXTUAL DATA PIPELINE
 %% =========================
-ST3 --> POL[Policies & Compliance Rules]
-ST3 --> SLA[Contracts, SLAs]
-ST3 --> PROC[Business Processes]
+ST3 --> TRANS[Transactional & Operational State]
+ST3 --> USER[User-Specific Context & Session Data]
+ST3 --> LIVE[Real-Time Availability, Orders, Incidents]
 
-POL --> SCHED3[Periodic Refresh]
-SLA --> SCHED3
-PROC --> SCHED3
-
-SCHED3 --> DIFF3[Change Detection & Versioning]
-DIFF3 --> SEM3[Semantic Re-Indexing]
-SEM3 --> STORE3[Versioned Knowledge Store]
+TRANS & USER & LIVE --> SCHED3[Continuous / Near-Real-Time Sync]
+SCHED3 --> VALID3[Freshness & Consistency Validation]
+VALID3 --> SEM3[Temporal Semantic Encoding & Contextualization]
+SEM3 --> STORE3[Short-Lived / Volatile Knowledge Store<br>Change Frequency: Seconds / Minutes]
 
 %% =========================
 %% UNIFIED KNOWLEDGE ACCESS
