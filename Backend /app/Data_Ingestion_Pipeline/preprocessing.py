@@ -54,10 +54,10 @@ processor = Preprocessor(texts)
 processor.preprocess()
 processed_texts = processor.get_processed()
 
-print("\n")
-print("----------------------------------")
-print("Processed Texts:")
-print("----------------------------------")
-print("\n")
-for pt in processed_texts:
-    print(pt)
+# print("\n")
+# print("----------------------------------")
+# print("Processed Texts:")
+# print("----------------------------------")
+# print("\n")
+# for pt in processed_texts:
+#     print(pt)

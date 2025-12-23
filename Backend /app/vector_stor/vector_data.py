@@ -31,4 +31,10 @@ index.add(np.array(embeddings).astype("float32"))
 query = "Backend API design"
 query_vec = model.encode(query).astype("float32").reshape(1, -1)
 D, I = index.search(query_vec, k=3)
+
+
+print("\n")
+print("----------------------------------")
+print("Top similar documents for query:", query)
+print("----------------------------------")
 print(I)

@@ -28,11 +28,11 @@ embedded.generate_embeddings()
 vectors = embedded.get_embeddings()
 
 
-print("\n")
-print("----------------------------------")
-print("Generated Embeddings:")
-print("----------------------------------")
-print("\n")
+# print("\n")
+# print("----------------------------------")
+# print("Generated Embeddings:")
+# print("----------------------------------")
+# print("\n")
 
-for v in vectors:
-    print(v)
+# for v in vectors:
+#     print(v)
