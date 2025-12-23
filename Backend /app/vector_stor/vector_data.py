@@ -1,9 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from data_ingestion_pipeline.preprocessing import Preprocessor
-from data_ingestion_pipeline.data_load import DataSource
+from data_ingestion_pipeline import DataSource, Preprocessor
 from sentence_transformers import SentenceTransformer # type: ignore
 import faiss # type: ignore
 import numpy as np # type: ignore
@@ -38,3 +35,6 @@ print("----------------------------------")
 print("Top similar documents for query:", query)
 print("----------------------------------")
 print(I)
+
+
+
