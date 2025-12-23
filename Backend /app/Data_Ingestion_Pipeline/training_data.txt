@@ -1,0 +1,43 @@
+Nayan . DEV
+
+Hello I'm an Web Developer
+
+I'm Nayan Raval, a dedicated Web Developer based in India, specializing in backend development with the Laravel framework. I'm passionate about building efficient, secure, and scalable web applications.
+
+About Me
+
+Automation Test Engineer
+
+As a skilled Backend Developer, I specialize in building secure, scalable, and high-performance server-side applications. With expertise in Laravel, Node.js, and PHP, I design robust RESTful APIs, manage efficient databases, and architect backend systems that ensure reliability and seamless user experiences. From designing clean code structures to integrating CI/CD workflows, I bring development efficiency and technical excellence to every project.
+
+Full Name: Nayan Raval
+Email: ravalnayan029@gmail.com
+Field: Software Engineering
+Availability: Available for work
+
+Services
+
+Backend Architecture & API Design
+Database Management & Optimization
+Authentication & Security
+DevOps & API Deployment
+
+Skills
+
+PHP, Laravel, Node.js, JavaScript, TypeScript, HTML5, CSS, Docker, AWS, Git, GitHub, VSCode, Jira, BitBucket, Postman, Figma, Trello, Discord, Notion
+
+Projects
+
+Under Construction
+
+Blog
+
+Object-Oriented Programming (OOP)
+Basic Understanding of OOP programming.
+
+Contact
+
+Let's Connect!
+Feel free to reach out for projects, collaborations, or professional opportunities.
+
+© 2025 Nayan Raval. All rights reserved.
