@@ -1,6 +1,16 @@
-from preprocessing import Preprocessor, DataSource
+from .data_load import DataSource
+from .preprocessing import Preprocessor
 from sentence_transformers import SentenceTransformer # type: ignore
 
+# Load text data
+source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
+source.load_data()
+texts = source.get_data()
+
+# Preprocess
+processor = Preprocessor(texts)
+processor.preprocess()
+processed_texts = processor.get_processed()  
 class Embedded:
     def __init__(self, texts, model_name="all-MiniLM-L6-v2"):
         self.texts = texts
@@ -13,18 +23,16 @@ class Embedded:
     def get_embeddings(self):
         return self.vectors
 
-
-source = DataSource("data")
-source.load_data()
-texts = source.get_data()
-
-processor = Preprocessor(texts)
-processor.preprocess()
-processed_texts = processor.get_processed()
-
 embedded = Embedded(processed_texts)
 embedded.generate_embeddings()
 vectors = embedded.get_embeddings()
 
-for v in vectors:
-    print(v)
+
+# print("\n")
+# print("----------------------------------")
+# print("Generated Embeddings:")
+# print("----------------------------------")
+# print("\n")
+
+# for v in vectors:
+#     print(v)

@@ -67,29 +67,45 @@
 # print(f"Loaded {len(live_data)} live/contextual records")
 
 
-
 import os
 
 class DataSource:
-    def __init__(self, folder_path):
-        self.folder_path = folder_path
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
         self.data = []
 
     def load_data(self):
         self.data = []
-        for filename in os.listdir(self.folder_path):
-            if filename.endswith(".txt"):
-                file_path = os.path.join(self.folder_path, filename)
-                with open(file_path, "r", encoding="utf-8") as f:
-                    self.data.append(f.read())
+        try:
+            if os.path.isfile(self.path) and self.path.endswith(".txt"):
+                with open(self.path, "r", encoding="utf-8") as f:
+                    content = f.read().strip()
+                    if content:
+                        self.data.append(content)
+            elif os.path.isdir(self.path):
+                for filename in os.listdir(self.path):
+                    if filename.endswith(".txt"):
+                        file_path = os.path.join(self.path, filename)
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read().strip()
+                            if content:
+                                self.data.append(content)
+            else:
+                print(f"Path does not exist or is not a valid file/folder: {self.path}")
+        except Exception as e:
+            print(f"Error loading data from {self.path}: {e}")
 
     def get_data(self):
         return self.data
 
 
-folder = "data"
-source = DataSource(folder)
+file_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
+source = DataSource(file_path)
 source.load_data()
 texts = source.get_data()
-for t in texts:
-    print(t)
+
+# print("Data from single file:")
+
+# for t in texts:
+#     print(t)
+
