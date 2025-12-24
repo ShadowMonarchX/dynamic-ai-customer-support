@@ -23,9 +23,9 @@ class Embedded:
     def get_embeddings(self):
         return self.vectors
 
-embedded = Embedded(processed_texts)
-embedded.generate_embeddings()
-vectors = embedded.get_embeddings()
+# embedded = Embedded(processed_texts)
+# embedded.generate_embeddings()
+# vectors = embedded.get_embeddings()
 
 
 # print("\n")

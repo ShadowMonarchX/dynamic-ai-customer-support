@@ -1,5 +1,6 @@
 import re
 import string
+from .data_load import DataSource
 
 STOPWORDS = {
     'i','me','my','myself','we','our','ours','ourselves','you','your','yours',
@@ -44,20 +45,23 @@ class Preprocessor:
 
 
 # Example usage
-from .data_load import DataSource
 
-source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
-source.load_data()
-texts = source.get_data()
 
-processor = Preprocessor(texts)
-processor.preprocess()
-processed_texts = processor.get_processed()
+# source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
+# # source = DataSource(file_path)
+# source.load_data()
+# texts = source.get_data()
+
+
+# processor = Preprocessor(texts)
+# processor.preprocess()
+# processed_texts = processor.get_processed()
 
 # print("\n")
 # print("----------------------------------")
 # print("Processed Texts:")
 # print("----------------------------------")
 # print("\n")
+
 # for pt in processed_texts:
 #     print(pt)
