@@ -8,8 +8,7 @@ from app.query_pipeline.context_assembler import ContextAssembler
 from app.reasoning.llm_reasoner import LLMReasoner
 from app.validation.answer_validator import AnswerValidator
 
-data_path = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend/data/training_data.txt"
-
+data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 source = DataSource(data_path)
 source.load_data()
 texts = source.get_data()
@@ -24,7 +23,7 @@ embeddings = embedded.get_embeddings()
 
 faiss_index = FAISSIndex(embeddings)
 
-user_query = "Backend API design By Nayan Raval"
+user_query = "Backend API design"
 
 query_proc = QueryPreprocessor(user_query)
 preprocessed_query = query_proc.preprocess()
