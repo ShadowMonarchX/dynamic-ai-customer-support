@@ -96,7 +96,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-
 class LLMReasoner:
     def __init__(
         self,
@@ -122,7 +121,7 @@ class LLMReasoner:
 
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=dtype,
+            dtype=dtype,
             low_cpu_mem_usage=True,
         ).to(self.device)
 

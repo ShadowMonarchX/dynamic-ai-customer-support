@@ -1,5 +1,5 @@
-import numpy as np # type: ignore
-import faiss # type: ignore
+import numpy as np  # type: ignore
+import faiss  # type: ignore
 
 class FAISSIndex:
     def __init__(self, embeddings):
