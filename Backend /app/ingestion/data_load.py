@@ -66,7 +66,6 @@
 # print(f"Loaded {len(operational_data)} operational records")
 # print(f"Loaded {len(live_data)} live/contextual records")
 
-
 import os
 
 class DataSource:
@@ -97,15 +96,3 @@ class DataSource:
 
     def get_data(self):
         return self.data
-
-
-# file_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
-# source = DataSource(file_path)
-# source.load_data()
-# texts = source.get_data()
-
-# print("Data from single file:")
-
-# for t in texts:
-#     print(t)
-
