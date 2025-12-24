@@ -1,10 +1,9 @@
 import os
 import numpy as np
 import faiss
-from data_ingestion_pipeline import DataSource, Preprocessor, Embedded
+from ..data_ingestion_pipeline import DataSource, Preprocessor, Embedded
 
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
-
 if not os.path.exists(data_path):
     raise FileNotFoundError(data_path)
 
@@ -27,10 +26,14 @@ index.add(np.array(embeddings).astype("float32"))
 
 query = "Backend API design"
 query_vec = embedded.model.encode(query).astype("float32").reshape(1, -1)
+
 D, I = index.search(query_vec, 3)
 
 print(I)
-
-# for idx in I[0]:
-#     print("Matched Text:", " ".join(processed_texts[idx]))
+print(D)
+# print("---------------------")
+# print("Top 3 similar texts:")
+# print("---------------------")
+# for i in I[0]:
+#     print(processed_texts[i])   
 
