@@ -57,6 +57,8 @@
 # print(answer)
 # print("\nConfidence:", validation_result["confidence"])
 # print("Issues:", validation_result["issues"])
+
+
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
@@ -67,11 +69,19 @@ from app.query_pipeline.context_assembler import ContextAssembler
 from app.reasoning.llm_reasoner import LLMReasoner
 from app.validation.answer_validator import AnswerValidator
 import numpy as np
+import os
 
-data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend/data/training_data.txt'
+data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
+
+if not os.path.exists(data_path):
+    raise FileNotFoundError(f"Data file does not exist: {data_path}")
+
 source = DataSource(data_path)
 source.load_data()
 texts = source.get_data()
+
+if not texts:
+    raise ValueError(f"No data found in {data_path}")
 
 processor = Preprocessor(texts)
 processor.preprocess()
@@ -80,6 +90,10 @@ processed_texts = processor.get_processed()
 embedded = Embedded(processed_texts)
 embedded.generate_embeddings()
 embeddings = embedded.get_embeddings()
+
+embeddings = np.array(embeddings, dtype="float32")
+if embeddings.ndim != 2:
+    raise ValueError("Embeddings must be 2D array [num_texts, embedding_dim]")
 
 faiss_index = FAISSIndex(embeddings)
 
