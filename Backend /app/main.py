@@ -45,9 +45,11 @@ retrieved_chunks = [processed_texts[i] for i in I[0]]
 assembler = ContextAssembler(retrieved_chunks)
 context = assembler.assemble()
 
-
+print("----------------------")
 print("User Query:", user_query)
-print("\nRetrieved Chunks:")
-for chunk in retrieved_chunks:
-    print("-", chunk)
+print("----------------------")
+print("\n")
+# print("\nRetrieved Chunks:")
+# for chunk in retrieved_chunks:
+#     print("-", chunk)
 print("\nAssembled Context:\n", context)
