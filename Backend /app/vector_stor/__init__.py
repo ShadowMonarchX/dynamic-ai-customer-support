@@ -1,8 +1,11 @@
 """
-vector_stor package
+vector_store package
 
-Contains vector storage and retrieval logic
-(e.g., FAISS indexing, similarity search).
+Handles vector storage and retrieval using FAISS.
+Exports:
+- FAISSIndex
 """
 
-__all__ = []
+from .faiss_index import faiss_index
+
+__all__ = ["FAISSIndex"]

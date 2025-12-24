@@ -1,16 +1,55 @@
-from fastapi import FastAPI
-from routers import items, users  # Import the routers
+import os
+from app.ingestion.data_load import DataSource
+from app.ingestion.preprocessing import Preprocessor
+from app.ingestion.embedding import Embedded
+from app.vector_store.faiss_index import FAISSIndex
+from app.query_pipeline.query_preprocess import QueryPreprocessor
+from app.query_pipeline.query_embed import QueryEmbedder
+from app.query_pipeline.context_assembler import ContextAssembler
 
-app = FastAPI(
-    title="My Awesome API",
-    description="This is a simple API built with FastAPI",
-    version="1.0.0",
-)
+# Load training data
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(BASE_DIR, "data", "training_data.txt")
 
+source = DataSource(data_path)
+source.load_data()
+texts = source.get_data()
 
-app.include_router(items.router, prefix="/items", tags=["items"])
-app.include_router(users.router, prefix="/users", tags=["users"])
+# Preprocess documents
+processor = Preprocessor(texts)
+processor.preprocess()
+processed_texts = processor.get_processed()
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the API!"}
+# Generate document embeddings
+embedded = Embedded(processed_texts)
+embedded.generate_embeddings()
+embeddings = embedded.get_embeddings()
+
+# Build FAISS index
+faiss_index = FAISSIndex(embeddings)
+
+# User query
+user_query = "Is Laptop X available and what is the delivery time?"
+
+# Query preprocessing
+query_proc = QueryPreprocessor(user_query)
+preprocessed_query = query_proc.preprocess()
+
+# Query embedding
+query_embedder = QueryEmbedder(embedded.model)
+query_vec = query_embedder.embed(preprocessed_query)
+
+# FAISS retrieval
+D, I = faiss_index.search(query_vec, top_k=3)
+retrieved_chunks = [processed_texts[i] for i in I[0]]
+
+# Assemble context
+assembler = ContextAssembler(retrieved_chunks)
+context = assembler.assemble()
+
+# Output
+print("User Query:", user_query)
+print("\nRetrieved Chunks:")
+for chunk in retrieved_chunks:
+    print("-", chunk)
+print("\nAssembled Context:\n", context)
