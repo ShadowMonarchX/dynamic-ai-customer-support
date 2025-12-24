@@ -1,6 +1,5 @@
 import re
 import string
-from .data_load import DataSource
 
 STOPWORDS = {
     'i','me','my','myself','we','our','ours','ourselves','you','your','yours',
@@ -16,52 +15,28 @@ STOPWORDS = {
     'than','too','very','s','t','can','will','just','don','should','now'
 }
 
+_punct_regex = re.compile(f"[{re.escape(string.punctuation)}]")
+
 class Preprocessor:
     def __init__(self, texts):
         self.texts = texts
         self.processed = []
 
-    def clean_text(self, text):
-        text = text.lower()
-        text = re.sub(f"[{re.escape(string.punctuation)}]", "", text)
-        return text
-
-    def tokenize(self, text):
-        return text.split()
-
-    def remove_stopwords(self, tokens):
-        return [t for t in tokens if t not in STOPWORDS]
-
     def preprocess(self):
-        self.processed = []
+        seen = set()
+        result = []
+
         for text in self.texts:
-            cleaned = self.clean_text(text)
-            tokens = self.tokenize(cleaned)
-            tokens = self.remove_stopwords(tokens)
-            self.processed.append(tokens)
+            text = text.lower()
+            text = _punct_regex.sub("", text)
+            tokens = [t for t in text.split() if t not in STOPWORDS]
+            cleaned = " ".join(tokens)
+
+            if cleaned and cleaned not in seen:
+                seen.add(cleaned)
+                result.append(cleaned)
+
+        self.processed = result
 
     def get_processed(self):
         return self.processed
-
-
-# Example usage
-
-
-# source = DataSource('/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt')
-# # source = DataSource(file_path)
-# source.load_data()
-# texts = source.get_data()
-
-
-# processor = Preprocessor(texts)
-# processor.preprocess()
-# processed_texts = processor.get_processed()
-
-# print("\n")
-# print("----------------------------------")
-# print("Processed Texts:")
-# print("----------------------------------")
-# print("\n")
-
-# for pt in processed_texts:
-#     print(pt)

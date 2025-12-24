@@ -23,7 +23,7 @@ embeddings = embedded.get_embeddings()
 
 faiss_index = FAISSIndex(embeddings)
 
-user_query = "Backend API design"
+user_query = "Brifly explain nayan raval introduction"
 
 query_proc = QueryPreprocessor(user_query)
 preprocessed_query = query_proc.preprocess()

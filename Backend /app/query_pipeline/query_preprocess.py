@@ -1,11 +1,13 @@
 import re
 
+
 class QueryPreprocessor:
     def __init__(self, query):
         self.query = query
 
     def preprocess(self):
-        q = self.query.lower()
-        q = re.sub(r"[^a-zA-Z0-9\s]", "", q)
-        q = re.sub(r"\s+", " ", q).strip()
-        return q  # always string
+        return re.sub(
+            r"\s+",
+            " ",
+            re.sub(r"[^a-z0-9\s]", "", self.query.lower()),
+        ).strip()

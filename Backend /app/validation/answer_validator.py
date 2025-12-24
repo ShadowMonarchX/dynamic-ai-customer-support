@@ -3,28 +3,30 @@ class AnswerValidator:
         self.min_length = min_length
 
     def validate(self, answer, context):
+        answer = (answer or "").strip()
+        context = context.lower()
+
         issues = []
 
-        if not answer or len(answer.strip()) < self.min_length:
+        if len(answer) < self.min_length:
             issues.append("Answer is incomplete")
 
-        if answer.lower() in ["i don't know", "not sure"]:
+        if answer.lower() in {"i don't know", "not sure"}:
             issues.append("Low confidence answer")
 
-        if not any(word in answer.lower() for word in context.lower().split()[:20]):
-            issues.append("Answer may be unrelated to context")
+        if answer:
+            answer_tokens = set(answer.lower().split())
+            context_tokens = set(context.split())
+            if not answer_tokens & context_tokens:
+                issues.append("Answer may be unrelated to context")
 
-        confidence = self._estimate_confidence(issues)
+        confidence = self._estimate_confidence(len(issues))
 
         return {
-            "valid": len(issues) == 0,
+            "valid": not issues,
             "confidence": confidence,
-            "issues": issues
+            "issues": issues,
         }
 
-    def _estimate_confidence(self, issues):
-        if not issues:
-            return 0.9
-        if len(issues) == 1:
-            return 0.6
-        return 0.3
+    def _estimate_confidence(self, issue_count):
+        return 0.9 if issue_count == 0 else 0.6 if issue_count == 1 else 0.3
