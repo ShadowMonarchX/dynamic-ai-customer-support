@@ -99,10 +99,10 @@ class DataSource:
         return self.data
 
 
-file_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
-source = DataSource(file_path)
-source.load_data()
-texts = source.get_data()
+# file_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
+# source = DataSource(file_path)
+# source.load_data()
+# texts = source.get_data()
 
 # print("Data from single file:")
 
