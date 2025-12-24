@@ -23,8 +23,8 @@
 #         response = self.llm(prompt)
 #         return response.strip()
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline # type: ignore
+import torch # type: ignore
 
 
 class LLMReasoner:
