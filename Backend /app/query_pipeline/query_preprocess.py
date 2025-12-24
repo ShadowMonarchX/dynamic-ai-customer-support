@@ -8,4 +8,4 @@ class QueryPreprocessor:
         q = self.query.lower()
         q = re.sub(r"[^a-zA-Z0-9\s]", "", q)
         q = re.sub(r"\s+", " ", q).strip()
-        return q
+        return q  # always string

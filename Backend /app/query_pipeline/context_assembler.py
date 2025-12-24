@@ -5,8 +5,9 @@ class ContextAssembler:
         self.history = conversation_history or []
 
     def assemble(self):
-        context = "\n".join(self.chunks)
+        # ensure every chunk is string
+        context = "\n".join([" ".join(c) if isinstance(c, list) else str(c) for c in self.chunks])
         if self.history:
-            context += "\nConversation History:\n" + "\n".join(self.history)
+            context += "\nConversation History:\n" + "\n".join([str(h) for h in self.history])
         context += f"\nSystem Instructions:\n{self.instructions}"
         return context

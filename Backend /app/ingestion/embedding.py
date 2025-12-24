@@ -1,5 +1,5 @@
-from .data_load import DataSource
-from .preprocessing import Preprocessor
+# from .data_load import DataSource
+# from .preprocessing import Preprocessor
 from sentence_transformers import SentenceTransformer # type: ignore
 
 # # Load text data

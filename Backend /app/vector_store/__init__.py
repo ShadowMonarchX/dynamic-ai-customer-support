@@ -6,6 +6,6 @@ Exports:
 - FAISSIndex
 """
 
-from .faiss_index import faiss_index
+from .faiss_index import FAISSIndex
 
 __all__ = ["FAISSIndex"]

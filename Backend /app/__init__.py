@@ -1,11 +1,10 @@
 """
 app package
 
-Contains the main application code including:
+Main application package containing:
 - data ingestion
-- preprocessing
-- embedding
-- vector storage (FAISS)
+- vector storage
+- query processing pipeline
 """
 
-__all__ = ["data_ingestion_pipeline", "vector_stor"]
+__all__ = ["ingestion", "vector_store", "query_pipeline"]

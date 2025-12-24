@@ -1,4 +1,3 @@
-import os
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
@@ -8,8 +7,8 @@ from app.query_pipeline.query_embed import QueryEmbedder
 from app.query_pipeline.context_assembler import ContextAssembler
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(BASE_DIR, "data", "training_data.txt")
+
+data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
 source = DataSource(data_path)
 source.load_data()
@@ -28,7 +27,7 @@ embeddings = embedded.get_embeddings()
 faiss_index = FAISSIndex(embeddings)
 
 
-user_query = "Is Laptop X available and what is the delivery time?"
+user_query = "Backend API design By Nayan Raval"  # Example user query
 
 
 query_proc = QueryPreprocessor(user_query)
