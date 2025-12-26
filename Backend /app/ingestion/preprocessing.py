@@ -1,5 +1,8 @@
 import re
 import string
+from typing import List
+from langchain_core.documents import Document # type: ignore
+
 
 STOPWORDS = {
     'i','me','my','myself','we','our','ours','ourselves','you','your','yours',
@@ -19,22 +22,28 @@ STOPWORDS = {
 _punct_regex = re.compile(f"[{re.escape(string.punctuation)}]")
 
 class Preprocessor:
-    def __init__(self, texts):
-        self.texts = texts
-        self.processed = []
+    def __init__(self, documents: List[Document] = None):
+        self.documents = documents or []
 
-    def preprocess(self):
+    def transform_documents(self, documents: List[Document] = None) -> List[Document]:
+        docs_to_process = documents or self.documents
         seen = set()
-        result = []
-        for text in self.texts:
-            text = text.lower()
+        processed_docs = []
+
+        for doc in docs_to_process:
+            text = doc.page_content.lower()
             text = _punct_regex.sub("", text)
             tokens = [t for t in text.split() if t not in STOPWORDS]
             cleaned = " ".join(tokens)
+
             if cleaned and cleaned not in seen:
                 seen.add(cleaned)
-                result.append(cleaned)
-        self.processed = result
+                processed_docs.append(
+                    Document(
+                        page_content=cleaned,
+                        metadata=doc.metadata
+                    )
+                )
 
-    def get_processed(self):
-        return self.processed
+        return processed_docs
+
