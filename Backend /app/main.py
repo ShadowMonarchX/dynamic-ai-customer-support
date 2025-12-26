@@ -170,6 +170,7 @@ validation = validator.invoke({"answer": answer, "context": truncated_text})
 # print("----------------------")
 # print("\nAssembled Context:\n")
 # print(truncated_text)
+
 print("\n----------------------")
 print("Final Answer:")
 print("\n----------------------")
