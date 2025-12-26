@@ -1,16 +1,7 @@
 from typing import Dict, Any
 from langchain_core.runnables import Runnable # type: ignore
-
-
+ 
 class AnswerValidator(Runnable):
-    """
-    LangChain-style answer validator:
-    - Length check
-    - Low-confidence detection
-    - Context relevance check
-    - Confidence scoring
-    """
-
     def __init__(self, min_length: int = 20):
         self.min_length = min_length
 
@@ -44,6 +35,6 @@ class AnswerValidator(Runnable):
     def _estimate_confidence(self, issue_count: int) -> float:
         if issue_count == 0:
             return 0.9
-        if issue_count == 1:
+        elif issue_count == 1:
             return 0.6
         return 0.3

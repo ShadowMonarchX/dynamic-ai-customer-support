@@ -1,21 +1,27 @@
-from typing import List
-from langchain_community.vectorstores import FAISS  # type: ignore
-from langchain_core.documents import Document  # type: ignore
-from langchain_community.embeddings import HuggingFaceEmbeddings  # correct import
+import numpy as np  # type: ignore
+import faiss # type: ignore
 
 
 class FAISSIndex:
-    def __init__(self, embedding_model: HuggingFaceEmbeddings):
-        self.embedding_model = embedding_model
-        self.vectorstore: FAISS | None = None
+    def __init__(self, embeddings: np.ndarray):
+        embeddings = np.asarray(embeddings, dtype="float32")
 
-    def build_index(self, documents: List[Document]) -> None:
-        self.vectorstore = FAISS.from_documents(
-            documents=documents,
-            embedding=self.embedding_model
-        )
+        if embeddings.ndim != 2:
+            raise ValueError("Embeddings must be a 2D array")
 
-    def similarity_search(self, query: str, top_k: int = 1) -> List[Document]:
-        if not self.vectorstore:
-            raise RuntimeError("FAISS index not built")
-        return self.vectorstore.similarity_search(query, k=top_k)
+        self.embeddings = embeddings
+        self.embedding_dim = embeddings.shape[1]
+
+        self.index = faiss.IndexFlatL2(self.embedding_dim)
+        self.index.add(self.embeddings)
+
+    def similarity_search(self, query_vec: np.ndarray, top_k: int = 1):
+        query_vec = np.asarray(query_vec, dtype="float32")
+
+        if query_vec.ndim == 1:
+            query_vec = query_vec.reshape(1, -1)
+
+        if query_vec.shape[1] != self.embedding_dim:
+            raise ValueError("Query vector dimension mismatch")
+
+        return self.index.search(query_vec, top_k)

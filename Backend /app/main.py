@@ -7,52 +7,72 @@ from app.query_pipeline.query_embed import QueryEmbedder
 from app.query_pipeline.context_assembler import ContextAssembler
 from app.reasoning.llm_reasoner import LLMReasoner
 from app.validation.answer_validator import AnswerValidator
-import numpy as np
+import numpy as np # type: ignore
 import os
 
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
 if not os.path.exists(data_path):
-    raise FileNotFoundError(f"Data file does not exist: {data_path}")
+    raise FileNotFoundError(data_path)
 
 source = DataSource(data_path)
 source.load_data()
-texts = source.get_documents()
+documents = source.get_documents()
 
-if not texts:
-    raise ValueError(f"No data found in {data_path}")
+if not documents:
+    raise ValueError("No documents loaded")
 
 processor = Preprocessor()
-processed_texts = processor.transform_documents(texts)
+processed_docs = processor.transform_documents(documents)
 
-embedded = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vectors = embedded.embed_documents(processed_texts)
-vectors = np.array(vectors, dtype="float32")
+embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
+doc_vectors = embedder.embed_documents(processed_docs)
+doc_vectors = np.array(doc_vectors, dtype="float32")
 
-faiss_index = FAISSIndex(vectors)
+faiss_index = FAISSIndex(doc_vectors)
 
 user_query = "Brifly explain nayan raval introduction"
-query_proc = QueryPreprocessor()
-preprocessed_query = query_proc.preprocess(user_query)
 
+query_processor = QueryPreprocessor()
+clean_query = query_processor.invoke(user_query)
 
-query_vec = embedded.embed_query(preprocessed_query)
-query_vec = np.array([query_vec], dtype="float32")
+query_vector = embedder.embed_query(clean_query)
+query_vector = np.array([query_vector], dtype="float32")
 
-D, I = faiss_index.similarity_search(query_vec, top_k=3)
-retrieved_chunks = [processed_texts[i] for i in I[0] if i < len(processed_texts)]
+D, I = faiss_index.similarity_search(query_vector, top_k=3)
+retrieved_chunks = [processed_docs[i] for i in I[0] if i < len(processed_docs)]
 
 assembler = ContextAssembler(
-    retrieved_chunks,
     system_instructions="Answer only using the retrieved context. Do not hallucinate."
 )
-context = assembler.assemble_prompt()
 
-reasoner = LLMReasoner(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-answer = reasoner.invoke(user_query, context)
+prompt = assembler.assemble_prompt(
+    retrieved_docs=retrieved_chunks
+)
+
+context = prompt.format_prompt(
+    question=user_query
+).to_string()
+
+reasoner = LLMReasoner(
+    model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+)
+
+answer = reasoner.invoke(
+    {
+        "query": user_query,
+        "context": context,
+    }
+)
 
 validator = AnswerValidator()
-validation_result = validator.invoke(answer, context)
+validation = validator.invoke(
+    {
+        "answer": answer,
+        "context": context,
+    }
+)
+
 
 print("----------------------")
 print("User Query:", user_query)
@@ -63,5 +83,5 @@ print("\n----------------------")
 print("Final Answer:")
 print("\n----------------------")
 print(answer)
-print("\nConfidence:", validation_result["confidence"])
-print("Issues:", validation_result["issues"])
+print("\nConfidence:", validation["confidence"])
+print("Issues:", validation["issues"])
