@@ -3,6 +3,7 @@ from langchain_core.runnables import Runnable # type: ignore
 
 class QueryPreprocessor(Runnable):
     def invoke(self, query: str) -> str:
-        cleaned_query = re.sub(r"[^a-z0-9\s]", "", query.lower())
-        cleaned_query = re.sub(r"\s+", " ", cleaned_query).strip()
-        return cleaned_query
+        # Lowercase, remove special characters, normalize whitespace
+        return re.sub(
+            r"\s+", " ", re.sub(r"[^a-z0-9\s]", "", query.lower())
+        ).strip()

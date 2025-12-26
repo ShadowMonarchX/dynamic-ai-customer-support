@@ -13,6 +13,8 @@ class Embedded:
     def embed_query(self, query: str) -> List[float]:
         return self.embedding_model.embed_query(query)
 
+        return self.embedding_model.embed_query(query)
+
 
     
 # from .data_load import DataSource
