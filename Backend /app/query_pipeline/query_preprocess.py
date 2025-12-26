@@ -1,5 +1,5 @@
 import re
-from langchain.schema import Runnable
+from langchain_core.runnables import Runnable # type: ignore
 
 
 class QueryPreprocessor(Runnable):

@@ -1,11 +1,11 @@
 from typing import List
-from langchain.vectorstores import FAISS
-from langchain.schema import Document
-from langchain.embeddings.base import Embeddings
+from langchain_community.vectorstores import FAISS  # type: ignore
+from langchain_core.documents import Document  # type: ignore
+from langchain_community.embeddings import HuggingFaceEmbeddings  # correct import
 
 
 class FAISSIndex:
-    def __init__(self, embedding_model: Embeddings):
+    def __init__(self, embedding_model: HuggingFaceEmbeddings):
         self.embedding_model = embedding_model
         self.vectorstore: FAISS | None = None
 

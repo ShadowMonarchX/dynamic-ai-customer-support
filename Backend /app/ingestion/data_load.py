@@ -67,8 +67,8 @@
 # print(f"Loaded {len(live_data)} live/contextual records")
 
 import os
-from langchain.document_loaders import TextLoader, DirectoryLoader
-from langchain.schema import Document
+from langchain_community.document_loaders import TextLoader, DirectoryLoader # type: ignore
+from langchain_core.documents import Document # type: ignore
 
 
 class DataSource:

@@ -1,7 +1,7 @@
 import re
 import string
 from typing import List
-from langchain.schema import Document
+from langchain_core.documents import Document # type: ignore
 
 
 STOPWORDS = {

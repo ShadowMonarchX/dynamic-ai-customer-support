@@ -10,6 +10,6 @@ Exports:
 
 from .data_load import DataSource
 from .preprocessing import Preprocessor
-from .embedding import Embedded
+from .embedding import  Embedded
 
 __all__ = ["DataSource", "Preprocessor", "Embedded"]

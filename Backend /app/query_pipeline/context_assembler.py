@@ -1,7 +1,8 @@
 from typing import List, Optional
-from langchain.schema import Document
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema.messages import SystemMessage, HumanMessage
+from langchain_core.documents import Document # type: ignore
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # type: ignore
+from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
+
 
 
 class ContextAssembler:

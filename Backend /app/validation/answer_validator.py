@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from langchain.schema import Runnable
+from langchain_core.runnables import Runnable
 
 
 class AnswerValidator(Runnable):
