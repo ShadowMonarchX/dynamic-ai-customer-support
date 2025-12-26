@@ -1,7 +1,7 @@
 from typing import List, Optional
-from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.documents import Document # type: ignore
+from langchain_core.prompts import ChatPromptTemplate # type: ignore
+from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
 
 class ContextAssembler:
     def __init__(self, system_instructions: str = "Answer only using the retrieved context."):
@@ -26,10 +26,10 @@ class ContextAssembler:
             total_length += len(text)
 
         context_text = "\n\n".join(context_parts)
+
         messages = [
-            SystemMessage(content=f"{self.system_instructions}\n\nContext:\n{context_text}")
+            SystemMessage(content=f"{self.system_instructions}\n\nContext:\n{context_text}"),
+            HumanMessage(content="{question}")  # only the user's question
         ]
-        if conversation_history:
-            messages.append(MessagesPlaceholder(variable_name="chat_history"))
-        messages.append(HumanMessage(content="{question}"))
+
         return ChatPromptTemplate.from_messages(messages)

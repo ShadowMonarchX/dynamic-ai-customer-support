@@ -95,10 +95,10 @@
 #         return text.strip()
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline # type: ignore
-from langchain_huggingface import HuggingFacePipeline # type: ignore
-from langchain_core.prompts import PromptTemplate # type: ignore
-from langchain_core.runnables import Runnable # type: ignore
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from langchain_huggingface import HuggingFacePipeline
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import Runnable
 
 class LLMReasoner(Runnable):
     def __init__(
@@ -122,7 +122,7 @@ class LLMReasoner(Runnable):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            torch_dtype=dtype,
+            dtype=dtype,
             low_cpu_mem_usage=True
         )
 
@@ -158,5 +158,10 @@ class LLMReasoner(Runnable):
 
         if not context:
             return "I don’t have enough information to answer this question."
+
+        max_length = 2048
+        context_tokens = self.tokenizer(context, return_tensors="pt")["input_ids"]
+        if context_tokens.shape[1] > max_length:
+            context = self.tokenizer.decode(context_tokens[0, -max_length:], skip_special_tokens=True)
 
         return self.chain.invoke({"context": context, "question": question}).strip()
