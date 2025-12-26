@@ -1,4 +1,3 @@
-
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
@@ -18,48 +17,42 @@ if not os.path.exists(data_path):
 
 source = DataSource(data_path)
 source.load_data()
-texts = source.get_data()
+texts = source.get_documents()
 
 if not texts:
     raise ValueError(f"No data found in {data_path}")
 
-processor = Preprocessor(texts)
-processor.preprocess()
-processed_texts = processor.get_processed()
+processor = Preprocessor()
+processed_texts = processor.transform_documents(texts)
 
-embedded = Embedded(processed_texts)
-embedded.generate_embeddings()
-embeddings = embedded.get_embeddings()
+embedded = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
+vectors = embedded.embed_documents(processed_texts)
+vectors = np.array(vectors, dtype="float32")
 
-embeddings = np.array(embeddings, dtype="float32")
-if embeddings.ndim != 2:
-    raise ValueError("Embeddings must be 2D array [num_texts, embedding_dim]")
-
-faiss_index = FAISSIndex(embeddings)
+faiss_index = FAISSIndex(vectors)
 
 user_query = "Brifly explain nayan raval introduction"
+query_proc = QueryPreprocessor()
+preprocessed_query = query_proc.preprocess(user_query)
 
-query_proc = QueryPreprocessor(user_query)
-preprocessed_query = query_proc.preprocess()
 
-query_embedder = QueryEmbedder(embedded.model)
-query_vec = query_embedder.embed(preprocessed_query)
+query_vec = embedded.embed_query(preprocessed_query)
 query_vec = np.array([query_vec], dtype="float32")
 
-D, I = faiss_index.search(query_vec, top_k=3)
+D, I = faiss_index.similarity_search(query_vec, top_k=3)
 retrieved_chunks = [processed_texts[i] for i in I[0] if i < len(processed_texts)]
 
 assembler = ContextAssembler(
     retrieved_chunks,
     system_instructions="Answer only using the retrieved context. Do not hallucinate."
 )
-context = assembler.assemble()
+context = assembler.assemble_prompt()
 
 reasoner = LLMReasoner(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-answer = reasoner.generate_answer(user_query, context)
+answer = reasoner.invoke(user_query, context)
 
 validator = AnswerValidator()
-validation_result = validator.validate(answer, context)
+validation_result = validator.invoke(answer, context)
 
 print("----------------------")
 print("User Query:", user_query)

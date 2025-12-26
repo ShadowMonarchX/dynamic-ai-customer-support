@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import Runnable # type: ignore
 
 
 class AnswerValidator(Runnable):

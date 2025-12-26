@@ -21,21 +21,16 @@ STOPWORDS = {
 
 _punct_regex = re.compile(f"[{re.escape(string.punctuation)}]")
 
-
 class Preprocessor:
-    """
-    LangChain-style document preprocessor:
-    - Lowercase
-    - Remove punctuation
-    - Remove stopwords
-    - Deduplicate content
-    """
+    def __init__(self, documents: List[Document] = None):
+        self.documents = documents or []
 
-    def transform_documents(self, documents: List[Document]) -> List[Document]:
+    def transform_documents(self, documents: List[Document] = None) -> List[Document]:
+        docs_to_process = documents or self.documents
         seen = set()
         processed_docs = []
 
-        for doc in documents:
+        for doc in docs_to_process:
             text = doc.page_content.lower()
             text = _punct_regex.sub("", text)
             tokens = [t for t in text.split() if t not in STOPWORDS]
@@ -51,3 +46,4 @@ class Preprocessor:
                 )
 
         return processed_docs
+

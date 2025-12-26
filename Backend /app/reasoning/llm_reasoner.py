@@ -97,8 +97,7 @@
 
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-
-from langchain.llms import HuggingFacePipeline # type: ignore
+from langchain_community.llms import HuggingFacePipeline # type: ignore
 from langchain_core.prompts import PromptTemplate  # type: ignore
 from langchain_core.runnables import Runnable   # type: ignore
 
