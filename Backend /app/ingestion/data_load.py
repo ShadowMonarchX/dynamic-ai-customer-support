@@ -67,32 +67,38 @@
 # print(f"Loaded {len(live_data)} live/contextual records")
 
 import os
+from langchain.document_loaders import TextLoader, DirectoryLoader
+from langchain.schema import Document
+
 
 class DataSource:
-    def __init__(self, path):
+    def __init__(self, path: str):
         self.path = os.path.abspath(path)
-        self.data = []
+        self.documents: list[Document] = []
 
-    def load_data(self):
-        self.data = []
+    def load_data(self) -> None:
         try:
             if os.path.isfile(self.path) and self.path.endswith(".txt"):
-                with open(self.path, "r", encoding="utf-8") as f:
-                    content = f.read().strip()
-                    if content:
-                        self.data.append(content)
-            elif os.path.isdir(self.path):
-                for filename in os.listdir(self.path):
-                    if filename.endswith(".txt"):
-                        file_path = os.path.join(self.path, filename)
-                        with open(file_path, "r", encoding="utf-8") as f:
-                            content = f.read().strip()
-                            if content:
-                                self.data.append(content)
-            else:
-                print(f"Path does not exist or is not a valid file/folder: {self.path}")
-        except Exception as e:
-            print(f"Error loading data from {self.path}: {e}")
+                loader = TextLoader(self.path, encoding="utf-8")
+                self.documents = loader.load()
 
-    def get_data(self):
-        return self.data
+            elif os.path.isdir(self.path):
+                loader = DirectoryLoader(
+                    self.path,
+                    glob="**/*.txt",
+                    loader_cls=TextLoader,
+                    loader_kwargs={"encoding": "utf-8"},
+                )
+                self.documents = loader.load()
+
+            else:
+                raise ValueError(
+                    f"Invalid path or unsupported format: {self.path}"
+                )
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to load data: {e}")
+
+    def get_documents(self) -> list[Document]:
+        return self.documents
+

@@ -1,30 +1,51 @@
+from typing import List, Optional
+from langchain.schema import Document
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.schema.messages import SystemMessage, HumanMessage
+
+
 class ContextAssembler:
-    def __init__(self, retrieved_chunks, system_instructions=None, conversation_history=None):
-        self.chunks = retrieved_chunks
-        self.instructions = system_instructions or "Answer only using retrieved context."
-        self.history = conversation_history or []
+    def __init__(
+        self,
+        system_instructions: str = "Answer only using the retrieved context."
+    ):
+        self.system_instructions = system_instructions
 
-    def assemble(self, max_chars=4000):
-        parts = []
-        length = 0
+    def assemble_prompt(
+        self,
+        retrieved_docs: List[Document],
+        conversation_history: Optional[List] = None,
+        max_chars: int = 4000
+    ) -> ChatPromptTemplate:
+        context_parts = []
+        total_length = 0
 
-        for chunk in self.chunks:
-            text = " ".join(chunk) if isinstance(chunk, list) else str(chunk)
+        for doc in retrieved_docs:
+            text = doc.page_content.strip()
             if not text:
                 continue
-            if length + len(text) > max_chars:
+
+            if total_length + len(text) > max_chars:
                 break
-            parts.append(text)
-            length += len(text)
 
-        if self.history:
-            history_text = "\n".join(map(str, self.history))
-            if length + len(history_text) <= max_chars:
-                parts.append("Conversation History:\n" + history_text)
-                length += len(history_text)
+            context_parts.append(text)
+            total_length += len(text)
 
-        instructions_text = f"System Instructions:\n{self.instructions}"
-        if length + len(instructions_text) <= max_chars:
-            parts.append(instructions_text)
+        context_text = "\n\n".join(context_parts)
 
-        return "\n\n".join(parts)
+        messages = [
+            SystemMessage(
+                content=f"{self.system_instructions}\n\nContext:\n{context_text}"
+            )
+        ]
+
+        if conversation_history:
+            messages.append(
+                MessagesPlaceholder(variable_name="chat_history")
+            )
+
+        messages.append(
+            HumanMessage(content="{question}")
+        )
+
+        return ChatPromptTemplate.from_messages(messages)

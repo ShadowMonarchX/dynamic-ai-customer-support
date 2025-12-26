@@ -1,13 +1,21 @@
-import numpy as np  # type: ignore
-import faiss  # type: ignore
+from typing import List
+from langchain.vectorstores import FAISS
+from langchain.schema import Document
+from langchain.embeddings.base import Embeddings
+
 
 class FAISSIndex:
-    def __init__(self, embeddings):
-        self.embeddings = np.asarray(embeddings, dtype="float32")
-        self.embedding_dim = self.embeddings.shape[1]
-        self.index = faiss.IndexFlatL2(self.embedding_dim)
-        self.index.add(self.embeddings)
+    def __init__(self, embedding_model: Embeddings):
+        self.embedding_model = embedding_model
+        self.vectorstore: FAISS | None = None
 
-    def search(self, query_vec, top_k=1):
-        query = np.asarray(query_vec, dtype="float32").reshape(1, -1)
-        return self.index.search(query, top_k)
+    def build_index(self, documents: List[Document]) -> None:
+        self.vectorstore = FAISS.from_documents(
+            documents=documents,
+            embedding=self.embedding_model
+        )
+
+    def similarity_search(self, query: str, top_k: int = 1) -> List[Document]:
+        if not self.vectorstore:
+            raise RuntimeError("FAISS index not built")
+        return self.vectorstore.similarity_search(query, k=top_k)

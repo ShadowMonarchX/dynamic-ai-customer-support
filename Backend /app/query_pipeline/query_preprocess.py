@@ -1,13 +1,18 @@
 import re
+from langchain.schema import Runnable
 
 
-class QueryPreprocessor:
-    def __init__(self, query):
-        self.query = query
+class QueryPreprocessor(Runnable):
+    """
+    LangChain-style query preprocessor:
+    - Lowercase
+    - Remove special characters
+    - Normalize whitespace
+    """
 
-    def preprocess(self):
+    def invoke(self, query: str) -> str:
         return re.sub(
             r"\s+",
             " ",
-            re.sub(r"[^a-z0-9\s]", "", self.query.lower()),
+            re.sub(r"[^a-z0-9\s]", "", query.lower()),
         ).strip()

@@ -93,10 +93,16 @@
 #             text = text.split("Answer:", 1)[-1]
 
 #         return text.strip()
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
 
-class LLMReasoner:
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+
+from langchain.llms import HuggingFacePipeline
+from langchain.prompts import PromptTemplate
+from langchain.schema import Runnable
+
+
+class LLMReasoner(Runnable):
     def __init__(
         self,
         model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
@@ -108,58 +114,61 @@ class LLMReasoner:
         self.max_context_tokens = max_context_tokens
 
         if torch.backends.mps.is_available():
-            self.device = torch.device("mps")
+            self.device = 0
             dtype = torch.float16
         else:
-            self.device = torch.device("cpu")
+            self.device = -1
             dtype = torch.float32
 
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_name,
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_name,
             use_fast=True,
         )
 
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name,
-            dtype=dtype,
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype=dtype,
             low_cpu_mem_usage=True,
-        ).to(self.device)
-
-        self.model.eval()
-
-    def _build_prompt(self, query: str, context: str) -> str:
-        return (
-            "<|system|>\n"
-            "You are a customer support AI assistant.\n"
-            "Answer ONLY using the provided context.\n"
-            "If the answer is not in the context, say you don't know.\n"
-            "<|user|>\n"
-            f"Context:\n{context}\n\nQuestion:\n{query}\n"
-            "<|assistant|>\n"
         )
 
-    def generate_answer(self, query: str, context: str) -> str:
-        if not context or not context.strip():
+        hf_pipeline = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            device=self.device,
+            max_new_tokens=self.max_new_tokens,
+            do_sample=False,
+            pad_token_id=tokenizer.eos_token_id,
+        )
+
+        self.llm = HuggingFacePipeline(pipeline=hf_pipeline)
+
+        self.prompt = PromptTemplate(
+            input_variables=["context", "question"],
+            template=(
+                "<|system|>\n"
+                "You are a customer support AI assistant.\n"
+                "Answer ONLY using the provided context.\n"
+                "If the answer is not in the context, say you don't know.\n"
+                "<|user|>\n"
+                "Context:\n{context}\n\n"
+                "Question:\n{question}\n"
+                "<|assistant|>\n"
+            ),
+        )
+
+        self.chain = self.prompt | self.llm
+
+    def invoke(self, inputs: dict) -> str:
+        context = inputs.get("context", "").strip()
+        question = inputs.get("query", "").strip()
+
+        if not context:
             return "I don’t have enough information to answer this question."
 
-        prompt = self._build_prompt(query, context)
-
-        inputs = self.tokenizer(
-            prompt,
-            return_tensors="pt",
-            truncation=True,
-            max_length=min(1536, self.max_context_tokens - self.max_new_tokens),
-        ).to(self.device)
-
-        with torch.no_grad():
-            outputs = self.model.generate(
-                **inputs,
-                max_new_tokens=self.max_new_tokens,
-                do_sample=False,
-                pad_token_id=self.tokenizer.eos_token_id,
-            )
-
-        generated = outputs[0][inputs["input_ids"].shape[1]:]
-        text = self.tokenizer.decode(generated, skip_special_tokens=True)
-
-        return text.strip()
+        return self.chain.invoke(
+            {
+                "context": context,
+                "question": question,
+            }
+        ).strip()
