@@ -12,3 +12,4 @@ class FAISSIndex:
     def similarity_search(self, query_vec: np.ndarray, top_k: int = 1):
         query_vec = np.atleast_2d(query_vec).astype("float32")
         return self.index.search(query_vec, top_k)
+EDIT REQUIRED

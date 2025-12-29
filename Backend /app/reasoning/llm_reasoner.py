@@ -72,3 +72,4 @@ class LLMReasoner(Runnable):
         answer = raw_output.split("Answer:")[-1].strip()
 
         return f"Question: {question}\nAnswer: {answer}"
+

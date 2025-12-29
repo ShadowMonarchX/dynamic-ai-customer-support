@@ -34,3 +34,4 @@ class AnswerValidator(Runnable):
         if issue_count == 1:
             return 0.6
         return 0.3
+
