@@ -182,13 +182,11 @@
 # print("\nConfidence:", validation["confidence"])
 # print("Issues:", validation["issues"])
 
-
 import os
 import re
-import numpy as np  # type: ignore
-
-from transformers import AutoTokenizer  # type: ignore
-from langchain_core.documents import Document  # type: ignore
+import numpy as np
+from transformers import AutoTokenizer
+from langchain_core.documents import Document
 
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
@@ -197,15 +195,7 @@ from app.vector_store.faiss_index import FAISSIndex
 from app.query_pipeline.query_preprocess import QueryPreprocessor
 from app.intent_detection.intent_classifier import IntentClassifier
 from app.reasoning.llm_reasoner import LLMReasoner
-from app.validation.answer_validator import AnswerValidator
-from app.response_strategy import (
-    GreetingResponseStrategy,
-    FAQResponseStrategy,
-    TransactionalResponseStrategy,
-    EmotionResponseStrategy,
-    BigIssueResponseStrategy,
-)
-
+from app.response_strategy import GreetingResponseStrategy
 
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
@@ -216,120 +206,88 @@ source = DataSource(data_path)
 source.load_data()
 documents = source.get_documents()
 
-if not documents:
-    raise ValueError("No documents loaded")
-
 processor = Preprocessor()
 processed_docs = processor.transform_documents(documents)
 
-if not processed_docs:
-    raise ValueError("No processed documents")
-
-
-
-def split_text(text: str, tokenizer, max_tokens: int = 500):
+def split_text(text, tokenizer, max_tokens=500):
     sentences = re.split(r"(?<=[.!?]) +", text)
-    chunks, current, tokens = [], "", 0
-
+    chunks = []
+    current = ""
+    tokens = 0
     for s in sentences:
         s_tokens = len(tokenizer(s, return_tensors="pt")["input_ids"][0])
         if tokens + s_tokens > max_tokens:
-            chunks.append(current.strip())
-            current, tokens = s, s_tokens
+            if current:
+                chunks.append(current.strip())
+            current = s
+            tokens = s_tokens
         else:
             current += " " + s
             tokens += s_tokens
-
     if current:
         chunks.append(current.strip())
     return chunks
 
-
 chunk_tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-
 chunks = []
+
 for doc in processed_docs:
     text = doc.page_content if isinstance(doc, Document) else str(doc)
     chunks.extend(split_text(text, chunk_tokenizer))
-
 
 embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
 vectors = embedder.embed_documents([Document(page_content=c) for c in chunks])
 vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
 
-faiss_index = FAISSIndex(vectors)
+metadata = [{"intent": "unknown"} for _ in chunks]
+faiss_index = FAISSIndex(vectors, chunks, metadata)
 
+while True:
+    user_query = input("Enter your question (type 'exit' to quit): ").strip()
 
+    if not user_query:
+        continue
 
-user_query = input("Enter your question: ").strip()
+    if user_query.lower() in {"exit", "quit", "q"}:
+        break
 
-query_processor = QueryPreprocessor()
-query_data = query_processor.invoke(user_query)
+    query_processor = QueryPreprocessor()
+    query_data = query_processor.invoke(user_query)
 
-clean_text = query_data["clean_text"]
-urgency = query_data["urgency"]
-emotion = query_data["emotion"]
+    clean_text = query_data["clean_text"]
+    urgency = query_data["urgency"]
+    emotion = query_data["emotion"]
 
-classifier = IntentClassifier(model="llama3")
-intent_data = classifier.classify(clean_text)
+    classifier = IntentClassifier(model="llama3")
+    intent_data = classifier.classify(clean_text)
 
-intent = intent_data["intent"]
+    intent = intent_data["intent"]
+    complexity = intent_data.get("complexity", "low")
 
+    if intent == "greeting":
+        answer = GreetingResponseStrategy().generate_response()
+    else:
+        query_vector = embedder.embed_query(clean_text)
+        query_vector = np.atleast_2d(np.array(query_vector, dtype="float32"))
 
-if intent == "greeting":
-    answer = GreetingResponseStrategy().generate_response()
+        retrieved = faiss_index.retrieve(query_vector, intent=intent)
+        context = retrieved["context"]
 
-elif intent == "faq":
-    answer = FAQResponseStrategy().generate_response(
-        "This service provides backend development support."
-    )
+        reasoner = LLMReasoner()
+        answer = reasoner.invoke(
+            {
+                "query": user_query,
+                "context": context,
+                "intent": intent,
+                "emotion": emotion,
+                "urgency": urgency,
+                "complexity": complexity,
+                "system_prompt": "You are a helpful, precise, and polite customer support assistant.",
+            }
+        )
 
-elif intent == "transactional":
-    answer = TransactionalResponseStrategy().generate_response(
-        "I can help with refunds, cancellations, or order tracking."
-    )
-
-elif intent == "account_support":
-    answer = EmotionResponseStrategy().generate_response(emotion)
-
-elif intent == "big_issue":
-    print(BigIssueResponseStrategy().generate_response())
-
-else:
-    
-    query_vector = embedder.embed_query(clean_text)
-    query_vector = np.atleast_2d(np.array(query_vector, dtype="float32"))
-
-    top_k = 4 if intent == "big_issue" else 1
-    _, indices = faiss_index.similarity_search(query_vector, top_k=top_k)
-
-    context_chunks = [chunks[i] for i in indices[0] if i < len(chunks)]
-    context = "\n".join(context_chunks)
-
-    reasoner = LLMReasoner()
-    answer = reasoner.invoke(
-        {
-            "query": user_query,
-            "context": context,
-        }
-    )
-
-
-validator = AnswerValidator()
-validation = validator.invoke(
-    {
-        "answer": answer,
-        "intent": intent,
-        "emotion": emotion,
-    }
-)
-
-
-
-print("\n----------------------")
-print("Final Answer:")
-print("----------------------")
-
-print(validation["answer"])
-print("\nConfidence:", validation["confidence"])
-print("Issues:", validation["issues"])
+    print("\n----------------------")
+    print("Final Answer:")
+    print("----------------------")
+    print(answer)
+    print("\n--------------------------------------------------\n")
