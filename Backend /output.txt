@@ -1,0 +1,71 @@
+ python -m app.main
+Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+`torch_dtype` is deprecated! Use `dtype` instead!
+Device set to use mps:0
+The following generation flags are not valid and may be ignored: ['temperature']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+
+----------------------
+Final Answer:
+
+----------------------
+Question: Give me contact details for Nayan Raval
+Answer: Nayan Raval's contact details are:
+
+Email: ravalnayan029gmailcom
+Phone: +91 9510117047
+
+You can reach out to Nayan Raval for any queries or inquiries related to his services.
+
+Confidence: 0.9
+Issues: []
+(venv) jenishshekhada@Jenishs-MacBook-Air Backend  % python -m app.main
+Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+`torch_dtype` is deprecated! Use `dtype` instead!
+Device set to use mps:0
+The following generation flags are not valid and may be ignored: ['temperature']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+
+----------------------
+Final Answer:
+
+----------------------
+Question: Hey
+Answer: Sure, I'd be happy to provide you with more context on our backend development services.
+
+Our team of experienced backend developers has extensive experience in building scalable, secure, and efficient web applications using various technologies such as Laravel, Node.js, and PHP. We have a strong focus on designing robust serverside solutions that optimize performance, deliver seamless user experiences, and ensure data security.
+
+Our backend development services include:
+
+1. Backend architecture
+
+Confidence: 0.9
+Issues: []
+(venv) jenishshekhada@Jenishs-MacBook-Air Backend  % python -m app.main
+Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+`torch_dtype` is deprecated! Use `dtype` instead!
+Device set to use mps:0
+The following generation flags are not valid and may be ignored: ['temperature']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+
+----------------------
+Final Answer:
+
+----------------------
+Question: what is backend development services
+Answer: Backend development services are the services offered by a web development company to develop and maintain backend applications. These services include designing, developing, testing, and deploying the backend application. The backend development services offered by a web development company can be tailored to meet the specific needs of the client. Some of the backend development services offered by a web development company include:
+
+1. Designing and developing the backend application
+2. Implementing database management systems (DBMS)
+
+Confidence: 0.9
+Issues: []

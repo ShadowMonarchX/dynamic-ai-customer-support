@@ -131,7 +131,7 @@ doc_vectors = embedder.embed_documents([Document(page_content=chunk) for chunk i
 doc_vectors = np.atleast_2d(np.array(doc_vectors, dtype="float32"))
 faiss_index = FAISSIndex(doc_vectors)
 
-user_query = "Give me contact details for Nayan Raval"
+user_query = "what is backend development services "
 query_processor = QueryPreprocessor()
 clean_query = query_processor.invoke(user_query)
 query_vector = embedder.embed_query(clean_query)
