@@ -72,27 +72,21 @@
 #         answer = raw_output.split("Answer:")[-1].strip()
 
 #         return f"Question: {question}\nAnswer: {answer}"
-
-import torch  # type: ignore
+import torch
 from typing import Dict, Any
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline  # type: ignore
-from langchain_huggingface import HuggingFacePipeline  # type: ignore
-from langchain_core.prompts import PromptTemplate  # type: ignore
-from langchain_core.runnables import Runnable  # type: ignore
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from langchain_huggingface import HuggingFacePipeline
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import Runnable
 
 ALLOWED_INTENTS = {"big_issue", "account_support"}
 HIGH_EMOTION = {"frustrated", "angry", "stressed", "urgent"}
 
 class LLMReasoner(Runnable):
-    def __init__(
-        self,
-        model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        max_new_tokens: int = 256,
-    ):
+    def __init__(self, model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens: int = 256):
         self.model_name = model_name
         self.max_new_tokens = max_new_tokens
 
-        # Device setup
         if torch.backends.mps.is_available():
             self.device = 0
             dtype = torch.float16
@@ -103,11 +97,10 @@ class LLMReasoner(Runnable):
             self.device = -1
             dtype = torch.float32
 
-        # Load tokenizer and model
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            torch_dtype=dtype,
+            dtype=dtype,
             low_cpu_mem_usage=True
         )
 
@@ -117,13 +110,13 @@ class LLMReasoner(Runnable):
             tokenizer=self.tokenizer,
             device=self.device,
             max_new_tokens=self.max_new_tokens,
-            do_sample=False,
+            do_sample=True,  # enable temperature if desired
+            temperature=0.7,
             pad_token_id=self.tokenizer.eos_token_id
         )
 
         self.llm = HuggingFacePipeline(pipeline=hf_pipeline)
 
-        # Prompt template: system + context + user + features
         self.prompt = PromptTemplate(
             input_variables=["system_prompt", "context", "query", "intent", "emotion", "urgency", "complexity", "answer_size"],
             template=(
@@ -142,7 +135,6 @@ class LLMReasoner(Runnable):
         self.chain = self.prompt | self.llm
 
     def invoke(self, inputs: Dict[str, Any]) -> str:
-        # Extract inputs
         query = inputs.get("query", "").strip()
         context = inputs.get("context", "").strip()
         system_prompt = inputs.get("system_prompt", "You are a helpful, precise, and polite customer support assistant.")
@@ -152,18 +144,19 @@ class LLMReasoner(Runnable):
         complexity = inputs.get("complexity", "small")
         answer_size = inputs.get("answer_size", "short")
 
-        # Skip LLM if not required
         if intent not in ALLOWED_INTENTS and emotion not in HIGH_EMOTION:
             return "No deep reasoning required; answer can be short and direct."
 
-        # Truncate context if too long
-        max_tokens = 1024
+        max_tokens = 512
         if context:
             tokens = self.tokenizer(context, return_tensors="pt")["input_ids"]
             if tokens.shape[1] > max_tokens:
                 context = self.tokenizer.decode(tokens[0, -max_tokens:], skip_special_tokens=True)
 
-        # Build LLM input
+        if len(self.tokenizer(query)["input_ids"]) > max_tokens:
+            query_tokens = self.tokenizer(query, return_tensors="pt")["input_ids"]
+            query = self.tokenizer.decode(query_tokens[0, -max_tokens:], skip_special_tokens=True)
+
         llm_input = {
             "system_prompt": system_prompt,
             "context": context,
@@ -175,9 +168,6 @@ class LLMReasoner(Runnable):
             "answer_size": answer_size,
         }
 
-        # Invoke LLM
         raw_output = self.chain.invoke(llm_input).strip()
-        # Extract answer cleanly
         answer = raw_output.split("Answer:")[-1].strip() if "Answer:" in raw_output else raw_output
-
         return answer
