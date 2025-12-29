@@ -1,5 +1,5 @@
 import os
-import numpy as np
+import numpy as np #type: ignore
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
@@ -7,8 +7,9 @@ from app.vector_store.faiss_index import FAISSIndex
 from app.query_pipeline.query_preprocess import QueryPreprocessor
 from app.reasoning.llm_reasoner import LLMReasoner
 from app.validation.answer_validator import AnswerValidator
-from langchain_core.documents import Document
-from transformers import AutoTokenizer
+from app.intent_detection.intent_classifier import IntentClassifier
+from langchain_core.documents import Document #type: ignore
+from transformers import AutoTokenizer #type: ignore
 import re
 
 
@@ -69,12 +70,49 @@ doc_vectors = np.atleast_2d(np.array(doc_vectors, dtype="float32"))
 faiss_index = FAISSIndex(doc_vectors)
 
 
-user_query = "what is backend development services "
-query_processor = QueryPreprocessor()
-clean_query = query_processor.invoke(user_query)
+# user_query = "what is backend development services "
+# user_query = input("Enter your Question  : ")
+
+# query_classifier = IntentClassifier(model="llama3")
+# intent_result = query_classifier.classify(user_query)
+
+# query_processor = QueryPreprocessor()
+# clean_query = query_processor.invoke(user_query,intent=intent_result.get("intent", "unknown"))
+
+
+
+
+user_query = input("Enter your Question: ").strip()
+
+classifier = IntentClassifier(model="llama3")
+intent_result = classifier.classify(user_query)
+
+intent = intent_result["intent"]
+
+if intent == "greeting":
+    print("Hi there! I'm your virtual assistant. How can I help you today?")
+
+elif intent == "faq":
+    clean_query = QueryPreprocessor().invoke(user_query)
+    print(f"FAQ detected. Cleaned query: {clean_query}")
+
+elif intent == "transactional":
+    print("I can help with your order, refund, or tracking. Please share the order number.")
+
+elif intent == "account_support":
+    print("I’m really sorry for the trouble. Let’s fix this as quickly as possible.")
+
+elif intent == "big_issue":
+    clean_query = QueryPreprocessor().invoke(user_query)
+    print("I understand this is important. Let me check the details and give you the best option.")
+
+else:
+    clean_query = QueryPreprocessor().invoke(user_query)
+    print("I’m here to help. Could you please provide a bit more detail?")
+
+
 query_vector = embedder.embed_query(clean_query)
 query_vector = np.atleast_2d(np.array(query_vector, dtype="float32"))
-
 
 D, I = faiss_index.similarity_search(query_vector, top_k=len(chunked_texts))
 retrieved_chunks = [chunked_texts[i] for i in I[0] if i < len(chunked_texts)]
