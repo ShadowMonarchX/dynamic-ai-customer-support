@@ -21,10 +21,13 @@ class QueryPreprocessor(Runnable):
             }
 
         lowered = query.lower()
-
         clean_text = re.sub(r"[^a-z0-9\s]", "", lowered).strip()
 
-        urgency = "high" if any(word in lowered for word in URGENT_KEYWORDS) else "low"
+        urgency = (
+            "high"
+            if any(word in lowered for word in URGENT_KEYWORDS)
+            else "low"
+        )
 
         emotion = (
             "frustrated"

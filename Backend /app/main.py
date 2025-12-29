@@ -8,6 +8,13 @@ from app.query_pipeline.query_preprocess import QueryPreprocessor
 from app.reasoning.llm_reasoner import LLMReasoner
 from app.validation.answer_validator import AnswerValidator
 from app.intent_detection.intent_classifier import IntentClassifier
+from app.response_strategy import (
+    GreetingResponseStrategy,
+    FAQResponseStrategy,
+    TransactionalResponseStrategy,
+    EmotionResponseStrategy,
+    BigIssueResponseStrategy,
+)
 from langchain_core.documents import Document #type: ignore
 from transformers import AutoTokenizer #type: ignore
 import re
@@ -84,31 +91,45 @@ faiss_index = FAISSIndex(doc_vectors)
 
 user_query = input("Enter your Question: ").strip()
 
+query_processor = QueryPreprocessor()
+query_data = query_processor.invoke(user_query)
+
+clean_text = query_data["clean_text"]
+urgency = query_data["urgency"]
+emotion = query_data["emotion"]
+
+
 classifier = IntentClassifier(model="llama3")
-intent_result = classifier.classify(user_query)
+intent_result = classifier.classify(clean_text)
 
 intent = intent_result["intent"]
 
+
 if intent == "greeting":
-    print("Hi there! I'm your virtual assistant. How can I help you today?")
+    print(GreetingResponseStrategy().generate_response())
 
 elif intent == "faq":
-    clean_query = QueryPreprocessor().invoke(user_query)
-    print(f"FAQ detected. Cleaned query: {clean_query}")
+    print(
+        FAQResponseStrategy().generate_response(
+            "This service provides backend development support."
+        )
+    )
 
 elif intent == "transactional":
-    print("I can help with your order, refund, or tracking. Please share the order number.")
-
-elif intent == "account_support":
-    print("I’m really sorry for the trouble. Let’s fix this as quickly as possible.")
+    print(
+        TransactionalResponseStrategy().generate_response(
+            "I can help with refunds, cancellations, or order tracking."
+        )
+    )
 
 elif intent == "big_issue":
-    clean_query = QueryPreprocessor().invoke(user_query)
-    print("I understand this is important. Let me check the details and give you the best option.")
+    print(BigIssueResponseStrategy().generate_response())
+
+elif intent == "account_support":
+    print(EmotionResponseStrategy().generate_response(emotion))
 
 else:
-    clean_query = QueryPreprocessor().invoke(user_query)
-    print("I’m here to help. Could you please provide a bit more detail?")
+    print("Could you please provide a bit more detail so I can assist you?")
 
 
 query_vector = embedder.embed_query(clean_query)
