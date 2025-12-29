@@ -1,4 +1,5 @@
- python -m app.main
+(venv) jenishshekhada@Jenishs-MacBook-Air Backend  % python -m app.main
+
 Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
 huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
 To disable this warning, you can either:
@@ -22,6 +23,9 @@ You can reach out to Nayan Raval for any queries or inquiries related to his ser
 
 Confidence: 0.9
 Issues: []
+
+
+
 (venv) jenishshekhada@Jenishs-MacBook-Air Backend  % python -m app.main
 Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
 huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
@@ -47,6 +51,9 @@ Our backend development services include:
 
 Confidence: 0.9
 Issues: []
+
+
+
 (venv) jenishshekhada@Jenishs-MacBook-Air Backend  % python -m app.main
 Token indices sequence length is longer than the specified maximum sequence length for this model (838 > 512). Running this sequence through the model will result in indexing errors
 huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
