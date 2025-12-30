@@ -1,66 +1,59 @@
 import re
+import threading
 from typing import Dict, Any
-from langchain_core.runnables import Runnable  # type: ignore
 from langdetect import detect, DetectorFactory # type: ignore
 
-# Ensure consistent language detection
 DetectorFactory.seed = 0
 
-# Keywords for urgency/emotion
-URGENT_KEYWORDS = [
-    "now", "urgent", "asap", "immediately", "today", "tomorrow", "right away"
-]
+URGENT_KEYWORDS = {"now", "urgent", "asap", "immediately", "today", "tomorrow", "right away"}
+FRUSTRATION_KEYWORDS = {"angry", "frustrated", "annoyed", "ridiculous", "worst", "failed", "again"}
 
-FRUSTRATION_KEYWORDS = [
-    "angry", "frustrated", "annoyed", "ridiculous", "worst",
-    "not working", "failed", "again", "third time"
-]
-
-class QueryPreprocessor(Runnable):
-    """
-    Preprocesses user query and extracts human-level features:
-    - Sentiment (simplified as frustration detection)
-    - Urgency flag
-    - Language
-    - Cleaned text
-    """
+class QueryPreprocessor:
+    def __init__(self):
+        self._lock = threading.Lock()
+        self.clean_regex = re.compile(r"[^a-z0-9\s]")
 
     def invoke(self, query: str) -> Dict[str, Any]:
-        if not isinstance(query, str) or not query.strip():
-            return {
-                "clean_text": "",
-                "urgency": "low",
-                "emotion": "neutral",
-                "language": "unknown",
-                "sentiment_score": 0.0
-            }
+        with self._lock:
+            try:
+                if not isinstance(query, str) or not query.strip():
+                    return self._default_response()
 
-        lowered = query.lower()
-        
-        # Clean text
-        clean_text = re.sub(r"[^a-z0-9\s]", "", lowered).strip()
+                lowered = query.lower()
+                clean_text = self.clean_regex.sub("", lowered).strip()
 
-        # Urgency detection
-        urgency_flag = any(word in lowered for word in URGENT_KEYWORDS)
-        urgency = "high" if urgency_flag else "low"
+                is_urgent = any(word in lowered for word in URGENT_KEYWORDS)
+                is_frustrated = any(word in lowered for word in FRUSTRATION_KEYWORDS)
 
-        # Emotion detection (simplified frustration detection)
-        is_frustrated = any(word in lowered for word in FRUSTRATION_KEYWORDS)
-        emotion = "frustrated" if is_frustrated else "neutral"
+                try:
+                    language = detect(query)
+                except:
+                    language = "unknown"
 
-        # Sentiment score (simplified: frustrated → negative, neutral → zero)
-        sentiment_score = -0.8 if is_frustrated else 0.0
+                return {
+                    "clean_text": clean_text,
+                    "urgency": "high" if is_urgent else "low",
+                    "emotion": "frustrated" if is_frustrated else "neutral",
+                    "sentiment_score": -0.8 if is_frustrated else 0.0,
+                    "language": language,
+                    "intent": self._detect_basic_intent(lowered)
+                }
+            except Exception as e:
+                raise RuntimeError(f"Query Preprocessing Failed: {e}")
 
-        # Language detection
-        try:
-            language = detect(query)
-        except:
-            language = "unknown"
+    def _detect_basic_intent(self, text: str) -> str:
+        if "refund" in text or "money back" in text:
+            return "refund"
+        if "help" in text or "how to" in text:
+            return "faq"
+        return "general"
 
+    def _default_response(self) -> Dict[str, Any]:
         return {
-            "clean_text": clean_text,
-            "urgency": urgency,
-            "emotion": emotion,
-            "sentiment_score": sentiment_score,
-            "language": language
+            "clean_text": "",
+            "urgency": "low",
+            "emotion": "neutral",
+            "sentiment_score": 0.0,
+            "language": "unknown",
+            "intent": "general"
         }
