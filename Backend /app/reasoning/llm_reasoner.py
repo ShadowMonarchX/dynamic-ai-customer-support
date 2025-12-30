@@ -12,6 +12,7 @@ class LLMReasoner:
             self.model_name = model_name
             self.max_new_tokens = max_new_tokens
 
+            # Device selection logic
             if torch.backends.mps.is_available():
                 self.device = "mps"
                 dtype = torch.float16
@@ -23,9 +24,11 @@ class LLMReasoner:
                 dtype = torch.float32
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+            
+            # Fixed: Changed torch_dtype to dtype to remove deprecation warning
             self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
-                torch_dtype=dtype,
+                dtype=dtype, 
                 low_cpu_mem_usage=True
             )
 
@@ -41,17 +44,21 @@ class LLMReasoner:
             )
             self.llm = HuggingFacePipeline(pipeline=hf_pipeline)
 
+            # Updated Prompt Template to emphasize the 'Guidance' (Answer Size)
             self.prompt = PromptTemplate(
                 input_variables=[
                     "system_prompt", "context", "query",
                     "intent", "emotion", "urgency", "complexity", "answer_size"
                 ],
                 template=(
-                    "{system_prompt}\n\n"
-                    "Context:\n{context}\n\n"
-                    "Query: {query}\n\n"
-                    "Features: {intent}, {emotion}, {urgency}, {complexity}\n\n"
-                    "Guidance: {answer_size}\n\n"
+                    "<|system|>\n"
+                    "{system_prompt}\n"
+                    "Constraint: {answer_size}\n"
+                    "Context: {context}</s>\n"
+                    "<|user|>\n"
+                    "Query: {query}\n"
+                    "Status: Intent={intent}, Emotion={emotion}, Urgency={urgency}</s>\n"
+                    "<|assistant|>\n"
                     "Answer:"
                 )
             )
@@ -60,33 +67,41 @@ class LLMReasoner:
             raise RuntimeError(f"LLM Initialization Failed: {e}")
 
     def invoke(self, inputs: Dict[str, Any]) -> str:
+        # Thread safety lock
         with self._lock:
             try:
                 query = inputs.get("query", "").strip()
                 context = inputs.get("context", "").strip()
                 
-                max_context_len = 512
-                if len(context) > 2000:
-                    tokens = self.tokenizer(context, return_tensors="pt", truncation=True, max_length=max_context_len)["input_ids"]
-                    context = self.tokenizer.decode(tokens[0], skip_special_tokens=True)
+                # Dynamic context truncation based on tokenizer
+                max_context_tokens = 512
+                context_ids = self.tokenizer.encode(context, truncation=True, max_length=max_context_tokens)
+                context = self.tokenizer.decode(context_ids, skip_special_tokens=True)
 
+                # Preparation of inputs for the chain
                 llm_input = {
-                    "system_prompt": inputs.get("system_prompt", "You are a polite support assistant."),
+                    "system_prompt": inputs.get("system_prompt", "You are a professional assistant."),
                     "context": context,
                     "query": query,
                     "intent": inputs.get("intent", "unknown"),
                     "emotion": inputs.get("emotion", "neutral"),
                     "urgency": inputs.get("urgency", "low"),
                     "complexity": inputs.get("complexity", "small"),
-                    "answer_size": inputs.get("answer_size", "short"),
+                    "answer_size": inputs.get("answer_size", "Provide a concise response.")
                 }
 
+                # Execution
                 raw_output = self.chain.invoke(llm_input)
                 
+                # Robust cleaning of output
                 if isinstance(raw_output, str):
+                    # Splitting to ensure we only return the AI's actual answer
                     processed = raw_output.split("Answer:")[-1].strip()
+                    # Remove any leftover stop tokens or stray system artifacts
+                    processed = processed.replace("</s>", "").replace("<|assistant|>", "").strip()
                     return processed
+                
                 return str(raw_output)
 
             except Exception as e:
-                return f"Error generating response: {str(e)}"
+                return f"Error in reasoning chain: {str(e)}"
