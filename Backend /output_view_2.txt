@@ -1,0 +1,190 @@
+foundation of any software application. It involves managing the data, services, and resources required for the frontend. Understanding the backend is essential for creating scalable and robust software applications.
+
+Customer: hii
+
+AI Support [unknown]: I am aware that the given context does not provide any information about the context of the question. As a result, I will provide a clear and concise response. Please provide me with the context of the question so that I can provide a relevant response.
+
+Thank you for your interest in working with me. I can provide a detailed explanation of my skills and experience in developing backend, web applications, using Laravel, Node.js, PHP, and modern web technologies. I specialize in developing RESTful APIs, implementing authentication and authorization mechanisms, optimizing databases, and integrating CI/CD pipelines to streamline development workflows. I have worked on e-commerce, content management systems, and enterprise-grade web applications, which have required me to adapt to new technologies and frameworks. I am highly adaptable, continuously learning new technologies and frameworks to stay ahead in the fast-evolving web development ecosystem. I have collaborated with startups, medium-scale enterprises, and freelance clients, contributing to projects that span e-commerce, content management systems, and enterprise-grade web applications. I am highly skilled in automation testing and system optimization, ensuring projects not only meet but exceed client expectations. I am a dedicated Web Developer based in India, specializing in backend development with a strong focus on building efficient, secure, and scalable web applications. Please feel free to contact me for more information or to discuss your project requirements. Best regards,
+
+Nayan Raval
+
+Customer: who is nayan?
+
+AI Support [unknown]: Nayan Raval is a Web Developer and Automation Test Engineer with a strong foundation in backend architecture. Developing and maintaining high-performance web applications with Laravel, Node.js, PHP, and modern web technologies. Giving a brief overview of their professional background and relevant skills.
+
+Customer: yes
+
+AI Support [unknown]: Implemented automated testing pipelines using PHPUnit, ensuring seamless integration and scalability. Ensured code quality and adherence to best practices. Optimized database queries, reducing average load time by 45%. Implemented role-based access control, RESTful APIs, and content versioning. Implemented task management, automated testing, and team collaboration tools. Deployed the project on AWS with Dockerized environments for scalability. Provided automated API testing framework using Node.js and Postman. Reduced manual testing efforts by over 70%. Provided tips on how to write efficient and maintainable code, follow best practices, and optimize performance. Ensured that the content and structure of the project were aligned with the client's needs and requirements.
+
+Customer: hcontact detail for nayan?
+
+AI Support [unknown]: Error generating response: probability tensor contains either `inf`, `nan` or element < 0
+
+Customer: how to contact nayan ?
+
+AI Support [unknown]: Contact Nayan Raval at ravalnayan029@gmail.com or via LinkedIn/GitHub/Email.
+
+Customer: how to call nayan ?
+
+AI Support [unknown]: Yes, I can offer my services. I have worked on a wide range of web development projects, from small startups to enterprise-level systems. My capabilities include PHP, Laravel, Node.js, and API development. I have expertise in optimizing database performance, implementing secure authentication and authorization mechanisms, and integrating CI/CD. I have experience in handling complex infrastructure and scaling systems to meet the demands of a growing business. I also have expertise in automated testing and code quality assurance. I offer a range of services, including web application development, API development, database optimization, web application design, and software engineering. Contact me for more information. I'd love to learn more about your project and how I can help you achieve your goals. Thank you for considering my services. I look forward to hearing from you. Sincere regards,
+
+Nayan Raval, Web Developer
+
+Customer: how to phone call nayan ?
+
+AI Support [unknown]: I am not available to make phone calls at the present time. However, you can reach me at the email provided in my resume or LinkedIn profile. Please provide me with your contact information so that I can provide you with a timely response.
+
+Customer: 9510117047 in nayan phone number so this number is write 
+
+AI Support [unknown]: Error generating response: out of range integral type conversion attempted
+
+Customer: exit 
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % clear 
+
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:110: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Device set to use mps
+AI Support System Ready. Type 'exit' to quit.
+
+Customer: hey
+
+AI Support [greeting]: hi, glad to hear that you're in need of our services. please provide me with as much information as possible so I can assist you with your technical or account issues. I'll respond as soon as possible.
+
+Customer: who is a nayan ?
+
+AI Support [unknown]: I am a Nayan Raval, a dedicated web developer based in India with a strong focus on building efficient, secure, and scalable web applications. My work revolves around designing robust server-side solutions, optimizing performance, and delivering seamless user experiences across diverse platforms. I specialize in Laravel, Node.js, PHP, and modern web technologies, with deep expertise in RESTful APIs, authentication & authorization mechanisms, database optimizations, and CI/CD. Collaborating on innovative projects, exploring professional opportunities, and attending industry events.
+
+Customer: exit 
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:110: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+`torch_dtype` is deprecated! Use `dtype` instead!
+Device set to use mps
+AI Support System Ready. Type 'exit' to quit.
+
+Customer: heyy
+ 
+
+AI Support Jessica : Context:
+I am a web developer with over 4 years of experience. I have experience in building scalable and reliable web applications using Node.js, Express, and MongoDB. I am proficient in frontend development using HTML, CSS, and JavaScript. I have experience in developing RESTful APIs using Node.js, Angular, and React. I am experienced in implementing authentication and authorization mechanisms using JWT and JWK. I am proficient in optimizing data stores using MongoDB. I have experience in setting up CI/CD pipelines using Git, Github, and Jenkins. I am experienced in integrating e-commerce platforms and content management systems. I am proficient in integrating CI/CD pipelines using Jenkins and GitLab. I am proficient in setting up web servers using Nginx and Apache. I have experience in integrating web apps with APIs using Node.js and Express. I am proficient in implementing scalable and reliable web applications using Node.js. Summary: I am a skilled web developer who has experience in building scalable and reliable web applications using Node.js, Express, and MongoDB. I am proficient in implementing authentication and authorization mechanisms using JWT and JWK. I am proficient in optimizing data stores using MongoDB. I have experience in setting up and integrating CI/CD pipelines using Git, Github, and Jenkins. I am proficient in integrating e-commerce platforms and content management systems. I am proficient in integrating CI/CD pipelines using Jenkins and GitLab. I am proficient in setting up and integrating web servers using Nginx and Apache. I have experience in integrating web apps with APIs using Node.js and Express. I am proficient in implementing scalable and reliable web applications using Node.js and MongoDB. I am flexible and adaptable, continually learning new technologies and frameworks to stay ahead in the fast-evolving web development ecosystem. My approach to development emphasizes problem-solving, automation, testing, and system optimization, ensuring projects not only meet but exceed client expectations. I am available for work, and I am available to travel to meet clients in person.
+
+Customer: 
+
+Customer: hey
+
+AI Support Jessica : hi there. I'm glad to hear that you're in need of my assistance. I'm here to help you with any technical or account issues you may have. Let me know if there's anything else I can assist you with. Please feel free to message me anytime. Have a great day!
+
+Customer: exit 
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:17: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+Device set to use mps
+
+--- AI Support System Ready (Jessica) ---
+Type 'exit' to quit.
+
+Customer: hey 
+AI Support Jessica (Low Confidence): Hi there! How can I help you with your technical or account issues?
+
+Brief greeting: I'm a professional AI support bot, and I'm here to provide assistance. Please let me know if there's anything I can help you with.
+
+Note: Avoid writing long letters or personal stories. Keep it brief and to the point.
+Customer: who is nayan ?
+AI Support Jessica (Low Confidence): Nayan Raval is an experienced Web Developer and Automation Test Engineer with strong foundation in backend architecture. He has a passion for writing clean, maintainable code and designing systems that scale effortlessly while ensuring security, stability, and reliability.
+Customer: List down skill for nayan raval which technology he knows? just list down.
+AI Support Jessica (Low Confidence): Nayan Raval is a skilled software engineer who has a deep understanding and experience in various front-end and back-end technologies, including but not limited to:
+
+1. HTML, CSS, and JavaScript (including responsive design and front-end frameworks like Bootstrap)
+2. Vue.js, React.js, and AngularJS (for front-end development)
+3. Node.js and Express.js (for building server-side applications)
+4. MongoDB (for database management)
+5. MySQL (for data storage and retrieval)
+6. Laravel and PHP (for web development)
+7. Git (version control and continuous integration)
+8. Docker (for cloud-based development and deployment)
+9. AWS (for cloud infrastructure and storage)
+10. Kubernetes (for container orchestration)
+11. Elasticsearch (for search and data indexing)
+12. AWS Lambda (for serverless computing)
+13. AWS S3 (for object storage)
+14. AWS RDS (for database management)
+15. AWS API Gateway (for API management)
+16. AWS SQS (for message queueing)
+17. AWS SNS (for real-time messaging)
+18. AWS KMS (for encryption and key management)
+19. AWS CloudWatch (for monitoring and logging)
+20. AWS Cost Explorer (for cost tracking)
+21. AWS Route 53 (for DNS management)
+22. AWS DynamoDB (for NoSQL database management)
+23. AWS S3 Glacier (for archive storage)
+24. AWS S3 Simple Storage Service (for object storage)
+25. AWS SNS Topic (for real-time messaging)
+
+I hope this helps! Let me know if you have any other questions.
+Customer: which projects are done?
+AI Support Jessica (Low Confidence): The project(s) listed in the provided context are not mentioned explicitly as completed or ongoing. The information above does not mention any specific projects that have been completed or in progress. It is possible that the projects mentioned were completed at different times or phases of the project's lifecycle, and their status is not specified. It's best to contact the individual(s) or company(ies) to get more information on the projects, if any, completed or in progress.
+Customer: how to rechout with him?
+AI Support Jessica (Low Confidence): 1. Rephrase the question to rephrase with him.
+
+"How can you help me rechouser with him?"
+
+2. Clarify the context of the conversation to understand his intention and emotions.
+
+"(Refers to the conversation we had with the person who is rechouser with him) Can you help me rechouser with him?"
+
+3. Express your willingness to rechouser with him.
+
+"(In response to the rechouser with him) I'd love to rechouser with him. What's the process?"
+
+4. Ask a simple question to rephrase the conversation to the rechouser with him.
+
+"(To the person who is rechouser with him, to ask if he would like to rechouser) Would you like to rechouser with me?"
+
+5. Follow up with the rechouser with him to ensure there is no confusion about the conversation.
+
+"(To the person who is rechouser with him) Great! I'd love to rechouser with you. Do you want to rechouser?"
+
+6. Express your willingness to rechouser with him again if he agrees.
+
+"(To the person who is rechouser with him) Absolutely! I'd love to rechouser with you again. Let's schedule a time to rechouser."
+Customer: how contact nayan ?
+AI Support Jessica (Low Confidence): Unfortunately, the provided sample text lacks information about the intended contact or the urgency of the message. It only mentions that the sample text is intended for Nayan Raval, a Web Developer based in India specializing in backend development with a strong focus on building efficient, secure, and scalable web applications. The text cannot be used to contact or communicate directly with Nayan Raval. Please provide additional information or a sample contact email or phone number to help Nayan Raval better assist you.
+Customer: how to contact nayan ?
+AI Support Jessica (Low Confidence): To contact Nayan Raval directly, you can send an email to ravalnayan029@gmail.com or reach out through his LinkedIn profile. His email is linked in his profile, and he is also on various professional networking sites like LinkedIn, GitHub, and Twitter.
+
+If you need any assistance from Nayan, feel free to reach out to him for any inquiries related to his work or any projects he is working on. He will be happy to help you.
+
+Best regards,
+
+[Your name]
+Customer: which type of project nayan can make?
+AI Support Jessica (Low Confidence): Nayan Raval can make a variety of types of projects, including e-commerce sites, user-generated content platforms, social media marketing campaigns, mobile applications, web applications, digital content creation, and more. Nayan's experience in implementing and optimizing backend applications, combined with his expertise in PHP, Node.js, Laravel, and other modern web technologies, makes him a valuable asset for various web development projects.
+Customer: Can nayan make project in PHP,Node.js?
+AI Support Jessica (Low Confidence): Yes, nayan can develop projects in PHP and Node.js. Nayan is an experienced developer with a proven track record of delivering high-quality and efficient PHP and Node.js solutions. Whether you need a simple web development project or a complex enterprise-level application, nayan can help you achieve your goals with his expertise. With his extensive knowledge and experience, he can bring innovative ideas and deliver solutions that meet your specific requirements. He can provide customized solutions that are tailored to meet your unique needs and requirements. So, feel free to reach out to nayan for any PHP or Node.js project requirements.
+Customer: exit
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:17: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+Device set to use mps
+
+--- AI Support System Ready (Jessica) ---
+Type 'exit' to quit.
+
+Customer: hey 
+AI Support Jessica (Low Confidence): Hi there!
+
+Sentence: Be extremely brief (max 2 sentences).
+
+Greeting the user and asking how you can help with their technical or account issues.
+
+Short and to the point.
+
+No longer than two sentences.
+Customer: exit 
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % 
