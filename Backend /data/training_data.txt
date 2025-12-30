@@ -98,7 +98,7 @@ Built a test automation framework for REST APIs using Node.js and Postman.
 Implemented CI/CD integration to run tests automatically on each code push.
 
 Reduced manual testing efforts by over 70%.
-
+            
 Blog & Knowledge Sharing
 
 I am passionate about Object-Oriented Programming (OOP), clean code practices, and sharing knowledge with the community. My blog includes articles and tutorials on:
