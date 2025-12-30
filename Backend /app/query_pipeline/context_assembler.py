@@ -1,35 +1,47 @@
-from typing import List, Optional
+import threading
+from typing import List, Optional, Dict, Any
 from langchain_core.documents import Document # type: ignore
 from langchain_core.prompts import ChatPromptTemplate # type: ignore
 from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
 
 class ContextAssembler:
-    def __init__(self, system_instructions: str = "Answer only using the retrieved context."):
-        self.system_instructions = system_instructions
+    def __init__(self):
+        self._lock = threading.Lock()
+        self.default_instruction = "Answer based on the context provided."
 
     def assemble_prompt(
         self,
         retrieved_docs: List[Document],
-        conversation_history: Optional[List] = None,
+        query_features: Dict[str, Any],
         max_chars: int = 4000
     ) -> ChatPromptTemplate:
-        context_parts = []
-        total_length = 0
+        with self._lock:
+            try:
+                context_parts = []
+                current_length = 0
 
-        for doc in retrieved_docs:
-            text = doc.page_content.strip()
-            if not text:
-                continue
-            if total_length + len(text) > max_chars:
-                break
-            context_parts.append(text)
-            total_length += len(text)
+                for doc in retrieved_docs:
+                    text = doc.page_content.strip()
+                    if total_len := (current_length + len(text)) > max_chars:
+                        break
+                    context_parts.append(text)
+                    current_length += len(text)
 
-        context_text = "\n\n".join(context_parts)
+                context_text = "\n\n".join(context_parts)
+                
+                # Dynamic Instruction based on engineered features
+                instruction = self.default_instruction
+                if query_features.get("emotion") == "frustrated":
+                    instruction += " The user is frustrated; be empathetic and apologetic."
+                if query_features.get("urgency") == "high":
+                    instruction += " Provide a concise, immediate solution."
 
-        messages = [
-            SystemMessage(content=f"{self.system_instructions}\n\nContext:\n{context_text}"),
-            HumanMessage(content="{question}")  # only the user's question
-        ]
+                messages = [
+                    SystemMessage(content=f"{instruction}\n\nKNOWLEDGE BASE:\n{context_text}"),
+                    HumanMessage(content="{question}")
+                ]
 
-        return ChatPromptTemplate.from_messages(messages)
+                return ChatPromptTemplate.from_messages(messages)
+                
+            except Exception as e:
+                raise RuntimeError(f"Context Assembly Failed: {e}")

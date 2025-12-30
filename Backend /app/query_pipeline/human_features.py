@@ -1,4 +1,4 @@
-from langdetect import detect, DetectorFactory
+from langdetect import detect, DetectorFactory # type: ignore
 
 DetectorFactory.seed = 0
 

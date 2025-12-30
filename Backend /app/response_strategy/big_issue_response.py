@@ -1,10 +1,15 @@
-class BigIssueResponseStrategy:
-    def generate_response(self) -> str:
-        return (
-            "I understand this is a serious issue, and I’m sorry you’re facing this.\n\n"
-            "Here’s what we can do next:\n"
-            "1. Review your case carefully\n"
-            "2. Explore the best possible resolution\n"
-            "3. Escalate to a human specialist if needed\n\n"
-            "Please share any relevant details so I can move this forward."
-        )
+import threading
+
+class BigIssueResponse:
+    def __init__(self):
+        self._lock = threading.Lock()
+
+    def get_strategy(self, features: dict) -> str:
+        with self._lock:
+            return """
+            STRATEGY: CRISIS ESCALATION
+            1. Reassure the user that their issue is being prioritized.
+            2. Explain that this is a complex case.
+            3. Provide a temporary workaround if available in the context.
+            4. Inform them that a human specialist may need to review this.
+            """

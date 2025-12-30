@@ -1,11 +1,11 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+import requests
+from bs4 import BeautifulSoup
 
-tokenizer = AutoTokenizer.from_pretrained("tiiuae/falcon-7b-instruct")
-# model = AutoModelForCausalLM.from_pretrained("tiiuae/falcon-7b-instruct", device_map="auto", torch_dtype=torch.float16)
-model = AutoModelForCausalLM.from_pretrained("tiiuae/falcon-7b-instruct").to("cuda")
+url = "https://nayanraval.vercel.app/"
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "html.parser")
 
-prompt = "Hello, how can you help me?"
-inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
-outputs = model.generate(**inputs, max_new_tokens=200)
-print(tokenizer.decode(outputs[0]))
+text = soup.get_text()
+
+with open("website_data.txt", "w", encoding="utf-8") as file:
+    file.write(text)
