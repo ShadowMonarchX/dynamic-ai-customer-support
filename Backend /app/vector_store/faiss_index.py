@@ -122,6 +122,8 @@
 # One-Line Summary (Docs / Interview)
 
 # faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
+
+
 import numpy as np
 import faiss
 import threading
