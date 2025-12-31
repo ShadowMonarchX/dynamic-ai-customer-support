@@ -123,12 +123,13 @@
 
 # faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
 
+
+
 import numpy as np
 import faiss
 import threading
 from typing import List, Dict, Any
 
-# How many final docs per intent
 INTENT_TOP_K = {
     "greeting": 0,
     "identity": 2,
@@ -142,14 +143,14 @@ INTENT_TOP_K = {
     "unknown": 2,
 }
 
-# Minimum similarity thresholds (L2 distance → lower is better)
-INTENT_DISTANCE_THRESHOLD = {
-    "identity": 0.75,
-    "faq": 0.85,
-    "services": 0.9,
-    "skills": 0.9,
-    "transactional": 0.8,
-    "unknown": 0.95,
+# Cosine similarity thresholds (higher is better, 1 = perfect match)
+INTENT_SIMILARITY_THRESHOLD = {
+    "identity": 0.65,
+    "faq": 0.7,
+    "services": 0.7,
+    "skills": 0.7,
+    "transactional": 0.6,
+    "unknown": 0.5,
 }
 
 
@@ -165,17 +166,20 @@ class FAISSIndex:
         if embeddings is None or len(embeddings) == 0:
             raise ValueError("Embeddings cannot be empty")
 
+        # Normalize embeddings for cosine similarity
         self.embeddings = np.atleast_2d(embeddings).astype("float32")
+        faiss.normalize_L2(self.embeddings)
+
         self.documents = documents
         self.metadata = metadata
 
-        self.index = faiss.IndexFlatL2(self.embeddings.shape[1])
+        self.index = faiss.IndexFlatIP(self.embeddings.shape[1])  # inner product = cosine
         self.index.add(self.embeddings)
 
-    def _is_identity_query(self, intent: str) -> bool:
-        return intent in {"identity", "profile", "who"}
+    def _is_identity_query(self, intent: str, query_text: str = "") -> bool:
+        return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
 
-    def retrieve(self, query_vector: np.ndarray, intent: str) -> Dict[str, Any]:
+    def retrieve(self, query_vector: np.ndarray, intent: str, query_text: str = "") -> Dict[str, Any]:
         with self._lock:
             top_k = INTENT_TOP_K.get(intent, 2)
 
@@ -183,26 +187,21 @@ class FAISSIndex:
                 return {"docs": [], "count": 0, "status": "skip"}
 
             query_vector = np.atleast_2d(query_vector).astype("float32")
+            faiss.normalize_L2(query_vector)
 
-            # Over-fetch to allow filtering
-            distances, indices = self.index.search(query_vector, top_k * 5)
-
-            threshold = INTENT_DISTANCE_THRESHOLD.get(intent, 0.95)
+            distances, indices = self.index.search(query_vector, top_k * 5)  # over-fetch
+            threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
             scored_docs = []
 
-            for dist, idx in zip(distances[0], indices[0]):
+            for sim, idx in zip(distances[0], indices[0]):
                 if idx == -1:
-                    continue
-
-                # 🔥 Distance gate (core fix)
-                if dist > threshold:
                     continue
 
                 meta = self.metadata[idx]
                 weight = meta.get("confidence_weight", 1.0)
 
-                # 🔥 Entity-first filtering for identity queries
-                if self._is_identity_query(intent):
+                # Identity-first filtering
+                if self._is_identity_query(intent, query_text):
                     if not meta.get("identity_rich") and meta.get("content_type") != "identity":
                         continue
 
@@ -214,15 +213,20 @@ class FAISSIndex:
                 if meta.get("status") == "deprecated":
                     continue
 
-                # Score = similarity + metadata confidence
-                final_score = dist / weight
+                # Apply threshold
+                if sim < threshold:
+                    continue
 
+                # Score = similarity * confidence weight (higher is better)
+                final_score = sim * weight
                 scored_docs.append((final_score, self.documents[idx]))
 
-            # Sort by best score
-            scored_docs.sort(key=lambda x: x[0])
-
+            scored_docs.sort(key=lambda x: x[0], reverse=True)
             selected_docs = [doc for _, doc in scored_docs[:top_k]]
+
+            if not selected_docs:
+                print(f"[FAISS Warning] Empty retrieval. Intent: {intent}, Query: '{query_text}'")
+                print(f"Top similarities: {distances[0][:5]}")
 
             return {
                 "docs": selected_docs,
