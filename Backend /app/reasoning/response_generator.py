@@ -20,27 +20,52 @@ class ResponseGenerator:
             return "Provide a detailed but professional 2-3 sentence response."
 
     def generate(self, data: Dict[str, Any]) -> str:
+        """
+        Generate grounded response based on:
+        - User query
+        - Context (retrieved docs)
+        - System prompt strategy
+        """
         with self._lock:
             try:
                 query = data.get("query", "")
+                context_text = data.get("context", "")
                 
-                # 1. Size Check for Safety
+                # 1️⃣ Token size check
                 token_count = len(self.reasoner.tokenizer.encode(query))
                 if token_count > self.max_query_size:
                     return "Error: Your question is too long. Please simplify."
 
-                # 2. Dynamic Size Guidance
+                # 2️⃣ Dynamic response size guidance
                 size_guidance = self._determine_size_constraint(query, data.get("intent", ""))
-                
-                # 3. Assemble Final Prompt
+
+                # 3️⃣ Strict grounding enforcement
+                system_prompt = (
+                    f"{data.get('system_prompt', '')} {size_guidance} "
+                    "ONLY ANSWER BASED ON THE PROVIDED CONTEXT. "
+                    "DO NOT GUESS. IF THE ANSWER IS NOT IN CONTEXT, "
+                    "RESPOND WITH: 'I’m not fully sure. Could you please clarify?'"
+                )
+
+                # 4️⃣ Fact-coverage self-check (pass context)
                 full_input = {
-                    **data,
-                    "answer_size": size_guidance,
-                    "system_prompt": f"{data.get('system_prompt', '')} {size_guidance}"
+                    "query": query,
+                    "context": context_text,
+                    "system_prompt": system_prompt,
+                    "intent": data.get("intent"),
+                    "emotion": data.get("emotion"),
+                    "urgency": data.get("urgency"),
+                    "follow_up": data.get("follow_up", False)
                 }
 
-                # 4. Final Invoke
-                return self.reasoner.invoke(full_input)
+                # 5️⃣ Invoke LLM reasoner
+                answer = self.reasoner.invoke(full_input)
+
+                # 6️⃣ Optional: validate length vs size guidance
+                if len(answer.split()) < 3 and len(query.split()) > 2:
+                    return "I’m not fully sure. Could you please clarify?"
+
+                return answer
 
             except Exception as e:
                 return f"Response Generation Failed: {str(e)}"

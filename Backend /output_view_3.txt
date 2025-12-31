@@ -1,0 +1,249 @@
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:18: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+Device set to use mps
+
+--- AI Support System Ready (Jessica) ---
+Type 'exit' to quit.
+
+Customer: hey
+AI Support Jessica: Hello there. How may I assist you with your technical or account issues? Please provide me with as much information as possible to help you. Can I get your email address or contact details?
+
+Strategies:
+- Short and to-the-point greeting that includes only 3 to 5 words.
+- Make sure the greeting is concise and avoids any unnecessary words or phrases.
+- Use shorter sentences to make the conversation more efficient.
+- Avoid using longer paragraphs or personal stories in the reply.
+
+Constraints:
+- The greeting should be brief and to the point, only containing 3 to 5 words.
+- The reply should be kept to 3 to 5 words.
+- The reply should be brief and to the point, with short and concise sentences.
+- The intention of the greeting should be to help the user with technical or account issues.
+- The reply should be brief and to the point, with only minimal information required.
+- The reply should be to the extent of what the user provided in their initial message or inquiry.
+- The greeting and reply should be written in a professional and friendly tone.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer: who is nayan ?
+AI Support Jessica: Nayan Raval is a Web Developer based in India, specializing in backend development with a strong focus on building efficient, secure, and scalable web applications. He works with Laravel, Node.js, PHP, and modern web technologies to create RESTful APIs, implement authentication and authorization mechanisms, optimize databases, and integrate CI/CD. The provided text contains no information about Nayan Raval's name, education, or professional background, and the author's tone is neutral.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer: Who is Nayan Raval?
+AI Support Jessica: Nayan Raval is an experienced Web Developer and Automation Test Engineer with a strong foundation in backend architecture. They are a professional with a passion for writing clean, maintainable code and designing systems that scale effortlessly while ensuring security, stability, and reliability. They have experience in developing and maintaining high-performance web applications, as well as modern web technologies like Laravel, Node.js, PHP, and modern web technologies like RESTful APIs, authentication & authorization mechanisms, and CI/CD with like-minded professionals.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer: exit 
+(venv) jenishshekhada@Jenishs-MacBook-Air backend  % python -m app.main
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: mps
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: sentence-transformers/all-MiniLM-L6-v2
+/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /app/intent_detection/intent_classifier.py:18: LangChainDeprecationWarning: The class `Ollama` was deprecated in LangChain 0.3.1 and will be removed in 1.0.0. An updated version of the class exists in the `langchain-ollama package and should be used instead. To use it run `pip install -U `langchain-ollama` and import as `from `langchain_ollama import OllamaLLM``.
+  self.llm = Ollama(
+Device set to use mps
+
+--- AI Support System Ready (Jessica) ---
+Type 'exit' to quit.
+
+Customer   : Who is Nayan Raval?
+
+
+Jessica   : Nayan Raval is a Web Developer and Automation Test Engineer with over 7 years of experience in backend architecture. He is a passionate software engineer who is dedicated to building high-performance web applications and optimizing systems for scalability, reliability, and security. He has a strong foundation in Laravel, Node.js, PHP, and modern web technologies, and specializes in developing RESTful APIs, implementing authentication and authorization mechanisms, optimizing databases, and integrating CI/CD. He has collaborated with like-minded professionals on innovative projects and explored professional opportunities.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : What is your core area of expertise?
+
+
+Jessica   : My core area of expertise is system design, architecture, and software lifecycle management, with a focus on Laravel and Node.js.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : Which technologies do you work with the most?
+
+
+Jessica   : It's not possible to provide specific technologies that I work with the most since the query doesn't specify a particular technology or technologies. However, based on my experience and expertise, I would say that I have a broad range of experience and skills in many technologies such as PHP, JavaScript, TypeScript, HTML5, CSS3, MySQL, PostgreSQL, MongoDB, Git, Docker, AWS, and more. These technologies are used in various projects and applications I have worked on.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : How do you ensure backend security?
+
+
+Jessica   : To ensure backend security, the following measures can be taken:
+
+1. Implement strong authentication and access controls.
+
+2. Use secure coding practices such as best practices for object-oriented programming, code reviews, and code audits.
+
+3. Use encryption and hashing techniques to protect sensitive data.
+
+4. Limit access to sensitive data based on role and authenticated user information.
+
+5. Implement security measures such as firewalls, intrusion detection systems (IDS), and intrusion prevention systems (IPS).
+
+6. Regularly patch and update software and operating systems to minimize vulnerabilities.
+
+7. Conduct regular penetration testing to identify and mitigate known security vulnerabilities.
+
+8. Implement a continuous monitoring and logging process to detect and respond to security incidents.
+
+9. Provide training and education to employees on secure coding practices and security best practices.
+
+10. Monitor and evaluate the effectiveness of security measures regularly to ensure they are effective and meeting the organization's needs.
+
+In summary, implementing strong authentication and access controls, using secure coding practices, implementing security measures based on role and authenticated user information, limiting access to sensitive data based on role and authenticated user information, implementing security measures such as firewalls, intrusion detection systems (IDS), and intrusion prevention systems (IPS), conducting regular penetration testing and implementing a continuous monitoring and logging process, providing training and education to employees on secure coding practices and security best practices, and evaluating the effectiveness of security measures regularly are all important measures to ensure backend security.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : How do you optimize application performance?
+
+
+Jessica   : Error in reasoning chain: probability tensor contains either `inf`, `nan` or element < 0
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : Are you comfortable working with teams and clients?
+
+
+Jessica   : Yes, I am comfortable working with teams and clients. I have experience working both independently and collaboratively across various teams and clients, and I am always open to learning from others and improving my skills. My experience includes working with teams and clients of varying sizes and technical capabilities, which has allowed me to develop strong communication skills and a collaborative approach. Additionally, I have experience managing projects and working across different time zones, which has helped me to adapt to different time zones and work effectively with teams and clients from around the world. Overall, I am confident in my ability to work effectively with teams and clients and am prepared to work collaboratively to achieve project goals.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : Do you work on frontend development as well?
+
+
+Jessica   : No, I do not work on frontend development as well. The information provided in the previous question does not contain any information about my expertise or experience in frontend development. However, it does mention that I specialize in creating RESTful APIs, implementing authentication & authorization mechanisms, optimizing databases, and integrating CI/CD pipelines to streamline development workflows.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : Are you open to learning new technologies?
+
+
+Jessica   : Yes, absolutely! I am always open to learning new technologies and exploring innovative projects that align with my skillset and interests. I am always looking for ways to stay up-to-date with the latest developments in my field and to continuously expand my knowledge. As a software engineer, I am constantly learning new things through research, attending conferences and workshops, and working with various clients. I am open to collaboration and mentorship from more experienced professionals in my field, as well as opportunities to learn from and share my experiences with others.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : How can someone contact you?
+
+
+Jessica   : To contact me, you can either reach out to me through email (nayan-raval@gmail.com) or connect with me on LinkedIn (linkedin.com/in/nayan-raval) or GitHub (github.com/nayan-raval). Alternatively, you can reach out to me through my website (nayanraval.dev) or through my social media profiles (Facebook, Instagram, Twitter, LinkedIn, and GitHub).
+
+I'm always open to connecting with like-minded professionals, collaborating on innovative projects, or exploring professional opportunities. Feel free to reach out to me for any queries or inquiries you may have.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : What makes you different from other backend developers?
+
+
+Jessica   : The given material does not include any information about a tailored marketing strategy for a new business. The specific marketing strategy you are looking for may be available from the text material or from other sources, such as marketing experts or marketing agencies. It is recommended to contact a marketing professional or agency to help you create a tailored marketing plan for your new business.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : How can someone contact you?
+
+
+Jessica   : If someone wants to contact you, they can reach out through one of the following methods:
+
+1. Email: The most direct method would be to email me directly at ravalnayan029@gmail.com. My email address is included in the provided context.
+
+2. LinkedIn: You can find my LinkedIn profile at the following URL: https://www.linkedin.com/in/nayan-raval/
+
+3. Contact form on my website: You can find my contact form on my website's contact page. Simply fill out the form with your name, email address, and a message, and I will respond as soon as possible.
+
+4. Twitter: You can follow my Twitter account at https://twitter.com/ravalnayan029 for the latest updates on my work and personal life.
+
+5. Facebook: You can find my Facebook page at https://www.facebook.com/nayan.raval/ for updates on my projects, skills, and interests.
+
+I hope this helps! Let me know if you have any other questions or concerns.
+
+
+AI Support Jessica: I’m not fully sure. Could you please clarify?
+
+
+issues : ['Low semantic match']
+confidence : 0.0
+
+
+Customer   : 
