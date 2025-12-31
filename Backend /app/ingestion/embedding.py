@@ -1,30 +1,29 @@
 # 3. embedding.py
 # (Semantic Transformation Layer)
 # Purpose
-
+#
 # Convert cleaned knowledge into a form the AI can search by meaning.
-
+#
 # What This File Represents
-
+#
 # Transforms each chunk into a semantic representation
-
+#
 # Prepares data for vector-based retrieval
-
+#
 # Why This Matters
-
+#
 # Keyword search ❌
-
+#
 # Meaning-based search ✅
-
+#
 # Example:
-
+#
 # “Delivery late”
-
+#
 # “Order delayed”
 # → Treated as the same intent
-
+#
 # 📌 This is the core intelligence layer of RAG ingestion
-
 
 import threading
 from typing import List, Union
@@ -59,5 +58,3 @@ class Embedded:
                 return self.embedding_model.embed_query(query)
             except Exception as e:
                 raise RuntimeError(f"Query embedding failed: {e}")
-
-

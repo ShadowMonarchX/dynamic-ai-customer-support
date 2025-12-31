@@ -1,40 +1,29 @@
-# ## Step 2: Query Enhancement (Dynamic)
-
-# ### Folder
-
-# `query_pipeline/`
-
-# ### File Involved
-
-# * `query_preprocess.py`
-
-# ### What Happens Here
-
-# Before searching data, the bot improves the query internally:
-
-# * Removes unnecessary or emotional words
-# * Adds missing business context
-# * Converts human language into searchable meaning
-
-# ### Example
-
+# query_preprocess.py
+# (Query Enhancement Layer)
+# Purpose
+#
+# Improve user queries before searching the knowledge base.
+#
+# What Happens Here
+#
+# Removes unnecessary or emotional words
+# Adds missing business context
+# Converts human language into searchable meaning
+#
+# Example
+#
 # User query:
-
 # > “Order not coming yet”
-
+#
 # Enhanced internal query:
-
 # > “Order delivery delay reasons and expected delivery time”
-
-# This step ensures **better retrieval accuracy**.
-
-
-
+#
+# This step ensures better retrieval accuracy.
 
 import re
 import threading
 from typing import Dict, Any
-from langdetect import detect, DetectorFactory # type: ignore
+from langdetect import detect, DetectorFactory  # type: ignore
 
 DetectorFactory.seed = 0
 

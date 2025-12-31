@@ -1,44 +1,42 @@
 # 2. preprocessing.py
 # (Cleaning, Normalization & Chunking Layer)
 # Purpose
-
+#
 # Make raw data AI-readable, consistent, and safe.
-
+#
 # What Happens in This File
-
+#
 # Removes HTML tags and UI noise
-
+#
 # Fixes broken formatting
-
+#
 # Normalizes language and tone
-
+#
 # Removes duplicates
-
+#
 # Filters outdated or invalid policies
-
+#
 # 📌 Prevents confusing or contradictory answers
-
+#
 # Chunking Responsibility (Very Important)
-
+#
 # This file also:
-
+#
 # Splits large documents into small, meaningful chunks
-
+#
 # Ensures one concept per chunk
-
+#
 # Example
-
+#
 # Refund policy →
-
+#
 # Eligibility rules
-
+#
 # Time limits
-
+#
 # Payment method conditions
-
+#
 # 📌 Smaller chunks = better retrieval precision
-
-
 
 import re
 import threading

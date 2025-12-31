@@ -1,36 +1,21 @@
-# ## Step 4: Context Selection & Validation
-
-# ### Folder
-
-# `query_pipeline/`
-
-# ### File Involved
-
-# * `context_assembler.py`
-
-# ### What Happens Here
-
-# From the retrieved documents, the bot:
-
-# * Selects the **most accurate sections**
-# * Removes **duplicate content**
-# * Resolves **conflicting policies or answers**
-# * Ensures **policy consistency**
-
-# ### If Data Is Missing
-
-# * Bot provides a **safe fallback response**, or
-# * Bot asks a **clarifying question** instead of guessing
-
-# This step ensures **answer reliability**.
-
-
+# context_assembler.py
+# (Context Selection & Validation Layer)
+# Purpose
+#
+# Selects the most accurate sections from retrieved documents,
+# removes duplicates, resolves conflicts, and ensures policy consistency.
+#
+# If data is missing:
+# - Provides a safe fallback response
+# - Or asks a clarifying question instead of guessing
+#
+# This step ensures answer reliability.
 
 import threading
-from typing import List, Optional, Dict, Any
-from langchain_core.documents import Document # type: ignore
-from langchain_core.prompts import ChatPromptTemplate # type: ignore
-from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
+from typing import List, Dict, Any
+from langchain_core.documents import Document  # type: ignore
+from langchain_core.prompts import ChatPromptTemplate  # type: ignore
+from langchain_core.messages import SystemMessage, HumanMessage  # type: ignore
 
 class ContextAssembler:
     def __init__(self):
@@ -50,14 +35,14 @@ class ContextAssembler:
 
                 for doc in retrieved_docs:
                     text = doc.page_content.strip()
-                    if total_len := (current_length + len(text)) > max_chars:
+                    if current_length + len(text) > max_chars:
                         break
                     context_parts.append(text)
                     current_length += len(text)
 
                 context_text = "\n\n".join(context_parts)
                 
-                # Dynamic Instruction based on engineered features
+                # Dynamic instruction based on query features
                 instruction = self.default_instruction
                 if query_features.get("emotion") == "frustrated":
                     instruction += " The user is frustrated; be empathetic and apologetic."
