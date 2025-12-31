@@ -11,5 +11,5 @@ Exports:
 from .query_preprocess import QueryPreprocessor
 from .query_embed import QueryEmbedder
 from .context_assembler import ContextAssembler
-
-__all__ = ["QueryPreprocessor", "QueryEmbedder", "ContextAssembler"]
+from .retrieval_router import RetrievalRouter
+__all__ = ["QueryPreprocessor", "QueryEmbedder", "ContextAssembler" , "RetrievalRouter"]

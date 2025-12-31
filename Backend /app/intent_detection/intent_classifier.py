@@ -1,9 +1,9 @@
 import threading
 from typing import Dict, Any
-from langdetect import detect, DetectorFactory
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_community.llms import Ollama
+from langdetect import detect, DetectorFactory # type: ignore
+from langchain_core.prompts import PromptTemplate # type: ignore
+from langchain_core.output_parsers import JsonOutputParser # type: ignore
+from langchain_community.llms import Ollama     # type: ignore
 
 DetectorFactory.seed = 0
 
@@ -22,14 +22,16 @@ class IntentClassifier:
         )
         self.parser = JsonOutputParser()
         self.prompt = PromptTemplate(
+
             template="""Return ONLY valid JSON.
-Fields:
-intent: one of [{intents}]
-emotion: one of [{emotions}]
-urgency: low | medium | high
-complexity: small | medium | big
-User message: "{message}"
-""",
+                        Fields:
+                        intent: one of [{intents}]
+                        emotion: one of [{emotions}]
+                        urgency: low | medium | high
+                        complexity: small | medium | big
+                        User message: "{message}"
+                    """,
+
             input_variables=["message"],
             partial_variables={
                 "intents": ", ".join(INTENTS),

@@ -25,9 +25,9 @@
 import threading
 from typing import List
 from langchain_core.documents import Document  # type: ignore
-from preprocessing import Preprocessor  # type: ignore
-from embedding import Embedded  # type: ignore
-from metadata_enricher import MetadataEnricher  # type: ignore
+from .preprocessing import Preprocessor  # type: ignore
+from .embedding import Embedded  # type: ignore
+from .metadata_enricher import MetadataEnricher  # type: ignore
 
 class IngestionManager:
     def __init__(

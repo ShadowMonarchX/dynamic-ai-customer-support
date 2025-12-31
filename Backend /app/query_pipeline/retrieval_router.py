@@ -15,7 +15,7 @@
 import threading
 from typing import List, Tuple
 from langchain_core.documents import Document  # type: ignore
-from query_embed import QueryEmbedder  # type: ignore
+from .query_embed import QueryEmbedder  # type: ignore
 
 class RetrievalRouter:
     def __init__(self, embedder: QueryEmbedder, vector_store):
