@@ -123,14 +123,15 @@
 
 # faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
 
-
 import numpy as np
 import faiss
 import threading
 from typing import List, Dict, Any
 
+# How many final docs per intent
 INTENT_TOP_K = {
     "greeting": 0,
+    "identity": 2,
     "faq": 3,
     "services": 3,
     "skills": 3,
@@ -139,6 +140,16 @@ INTENT_TOP_K = {
     "refund": 2,
     "big_issue": 4,
     "unknown": 2,
+}
+
+# Minimum similarity thresholds (L2 distance → lower is better)
+INTENT_DISTANCE_THRESHOLD = {
+    "identity": 0.75,
+    "faq": 0.85,
+    "services": 0.9,
+    "skills": 0.9,
+    "transactional": 0.8,
+    "unknown": 0.95,
 }
 
 
@@ -161,6 +172,9 @@ class FAISSIndex:
         self.index = faiss.IndexFlatL2(self.embeddings.shape[1])
         self.index.add(self.embeddings)
 
+    def _is_identity_query(self, intent: str) -> bool:
+        return intent in {"identity", "profile", "who"}
+
     def retrieve(self, query_vector: np.ndarray, intent: str) -> Dict[str, Any]:
         with self._lock:
             top_k = INTENT_TOP_K.get(intent, 2)
@@ -169,32 +183,46 @@ class FAISSIndex:
                 return {"docs": [], "count": 0, "status": "skip"}
 
             query_vector = np.atleast_2d(query_vector).astype("float32")
-            distances, indices = self.index.search(query_vector, top_k * 3)
 
-            selected_docs = []
+            # Over-fetch to allow filtering
+            distances, indices = self.index.search(query_vector, top_k * 5)
 
-            for idx in indices[0]:
+            threshold = INTENT_DISTANCE_THRESHOLD.get(intent, 0.95)
+            scored_docs = []
+
+            for dist, idx in zip(distances[0], indices[0]):
                 if idx == -1:
                     continue
 
-                meta = self.metadata[idx]
+                # 🔥 Distance gate (core fix)
+                if dist > threshold:
+                    continue
 
-                # STRICT METADATA FILTERING
-                if intent in {"order", "refund", "transactional"}:
-                    if meta.get("topic") not in {"order", "billing", "refund"}:
+                meta = self.metadata[idx]
+                weight = meta.get("confidence_weight", 1.0)
+
+                # 🔥 Entity-first filtering for identity queries
+                if self._is_identity_query(intent):
+                    if not meta.get("identity_rich") and meta.get("content_type") != "identity":
                         continue
 
-                if intent in {"services", "skills", "faq"}:
-                    if meta.get("source") not in {"faq", "profile", "docs"}:
+                # Intent-specific topic filtering
+                if intent in {"order", "refund", "transactional"}:
+                    if meta.get("topic") not in {"order", "billing", "refund"}:
                         continue
 
                 if meta.get("status") == "deprecated":
                     continue
 
-                selected_docs.append(self.documents[idx])
+                # Score = similarity + metadata confidence
+                final_score = dist / weight
 
-                if len(selected_docs) >= top_k:
-                    break
+                scored_docs.append((final_score, self.documents[idx]))
+
+            # Sort by best score
+            scored_docs.sort(key=lambda x: x[0])
+
+            selected_docs = [doc for _, doc in scored_docs[:top_k]]
 
             return {
                 "docs": selected_docs,

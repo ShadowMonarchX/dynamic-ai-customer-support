@@ -30,6 +30,7 @@ class HumanFeatureExtractor:
     def extract(cls, query: str, session_id: str) -> dict:
         lowered = query.lower()
 
+        # --- Detect human signals ---
         is_urgent = any(word in lowered for word in cls.URGENT_KEYWORDS)
         is_frustrated = any(word in lowered for word in cls.FRUSTRATION_KEYWORDS)
         is_followup = (
@@ -45,22 +46,33 @@ class HumanFeatureExtractor:
         with cls._LOCK:
             last_context = cls._SESSION_MEMORY.get(session_id, {})
 
-            features = {
-                "urgency": "high" if is_urgent else last_context.get("urgency", "low"),
-                "emotion": "frustrated" if is_frustrated else last_context.get("emotion", "neutral"),
-                "sentiment_score": -0.8 if is_frustrated else last_context.get("sentiment_score", 0.0),
-                "language": language,
-                "follow_up": is_followup,
-                "previous_intent": last_context.get("intent"),
-                "previous_topic": last_context.get("topic"),
-            }
+            # --- Map signals to features ---
+            urgency = "high" if is_urgent else last_context.get("urgency", "low")
+            emotion = "frustrated" if is_frustrated else last_context.get("emotion", "neutral")
+            sentiment_score = -0.8 if is_frustrated else last_context.get("sentiment_score", 0.0)
 
+            # Track follow-up & clarification fatigue
+            follow_up = is_followup or last_context.get("follow_up_count", 0) >= 2
+            follow_up_count = (last_context.get("follow_up_count", 0) + 1) if follow_up else 0
+
+            # Save session memory
             cls._SESSION_MEMORY[session_id] = {
-                "urgency": features["urgency"],
-                "emotion": features["emotion"],
-                "sentiment_score": features["sentiment_score"],
+                "urgency": urgency,
+                "emotion": emotion,
+                "sentiment_score": sentiment_score,
                 "intent": last_context.get("intent"),
                 "topic": last_context.get("topic"),
+                "follow_up_count": follow_up_count
+            }
+
+            features = {
+                "urgency": urgency,
+                "emotion": emotion,
+                "sentiment_score": sentiment_score,
+                "language": language,
+                "follow_up": follow_up,
+                "previous_intent": last_context.get("intent"),
+                "previous_topic": last_context.get("topic"),
             }
 
         return features

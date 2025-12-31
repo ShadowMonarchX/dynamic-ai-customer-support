@@ -27,11 +27,17 @@ DetectorFactory.seed = 0
 
 FOLLOWUP_KEYWORDS = {"that", "it", "this", "those", "same", "continue", "what about", "and then"}
 
-class IntentFeaturesExtractor:
-    def __init__(self):
-        self._lock = threading.Lock()
+# Context memory per session
+_SESSION_CONTEXT: Dict[str, Dict[str, Any]] = {}
+_LOCK = threading.Lock()
 
-    def extract(self, query: str, previous_context: Dict[str, Any] | None = None) -> Dict[str, Any]:
+
+class IntentFeaturesExtractor:
+    def __init__(self, max_decay: int = 5):
+        self._lock = threading.Lock()
+        self.max_decay = max_decay  # number of turns before context decays
+
+    def extract(self, query: str, previous_context: Dict[str, Any] | None = None, session_id: str | None = None) -> Dict[str, Any]:
         with self._lock:
             if not query or not query.strip():
                 return self._default_response()
@@ -48,10 +54,32 @@ class IntentFeaturesExtractor:
             intent_topic = self._detect_topic(lowered)
             question_type = self._detect_question_type(lowered)
 
-            # FOLLOW-UP OVERRIDE
-            if is_followup and previous_context:
-                intent_topic = previous_context.get("intent_topic", intent_topic)
-                question_type = previous_context.get("question_type", question_type)
+            # --- Session context handling ---
+            if session_id:
+                context = _SESSION_CONTEXT.get(session_id, {"turn_count": 0, "intent_topic": intent_topic, "question_type": question_type})
+
+                # Follow-up chaining with topic locking
+                if is_followup:
+                    intent_topic = context.get("intent_topic", intent_topic)
+                    question_type = context.get("question_type", question_type)
+                else:
+                    # Reset turn count for new topic
+                    context["turn_count"] = 0
+
+                # Increase turn count and apply context decay
+                context["turn_count"] = context.get("turn_count", 0) + 1
+                if context["turn_count"] > self.max_decay:
+                    context["intent_topic"] = intent_topic
+                    context["question_type"] = question_type
+                    context["turn_count"] = 0  # reset decay
+
+                # Save back context
+                context.update({
+                    "intent_topic": intent_topic,
+                    "question_type": question_type,
+                    "follow_up": is_followup
+                })
+                _SESSION_CONTEXT[session_id] = context
 
             return {
                 "intent_topic": intent_topic,
@@ -67,6 +95,8 @@ class IntentFeaturesExtractor:
             return "order/delivery"
         if any(word in text for word in ["account", "login", "password"]):
             return "account"
+        if any(word in text for word in ["who", "what", "whose", "profile", "bio"]):
+            return "identity"
         return "general"
 
     def _detect_question_type(self, text: str) -> str:
@@ -78,6 +108,8 @@ class IntentFeaturesExtractor:
             return "policy"
         if any(word in text for word in ["issue", "problem", "error", "failed"]):
             return "troubleshooting"
+        if any(word in text for word in ["who", "what", "whose", "bio", "profile"]):
+            return "identity_query"
         return "general"
 
     def _default_response(self) -> Dict[str, Any]:
