@@ -1,3 +1,50 @@
+# 1. data_load.py
+# (Data Collection Layer)
+# Purpose
+
+# This file is responsible for bringing all raw business data into the AI system.
+
+# What It Handles (Conceptually)
+
+# Reads data from multiple sources
+
+# Acts as the single entry point for ingestion
+
+# Abstracts away original file formats
+
+# Data Sources Covered
+
+# Website pages
+
+# Help center articles
+
+# FAQs
+
+# Product documentation
+
+# Order & refund policies
+
+# App database exports
+
+# Support tickets
+
+# Admin dashboards
+
+# File Types Ingested
+
+# .html, .md, .txt
+
+# .pdf, .docx
+
+# .json, .csv, .xml
+
+# Database summaries
+
+# Ticket & chat text
+
+# 📌 Key Principle
+# All formats are converted into clean plain text before moving forward.
+
 import os
 import threading
 from langchain_community.document_loaders import TextLoader, DirectoryLoader # type: ignore

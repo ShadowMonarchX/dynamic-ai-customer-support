@@ -1,3 +1,129 @@
+# vector_store/faiss_index.py
+# (Vector Storage & Retrieval Layer)
+# Purpose
+
+# faiss_index.py is responsible for storing semantic vectors and retrieving the most relevant knowledge for the customer support AI bot.
+
+# It is the bridge between ingestion and query pipelines.
+
+# Core Responsibilities
+# 1. Stores Vectors
+
+# This file manages:
+
+# Storage of vector embeddings generated during ingestion
+
+# Efficient indexing for large-scale data
+
+# Persistence of vector state across sessions
+
+# 📌 Each vector represents the meaning of a knowledge chunk, not raw text.
+
+# 2. Handles Similarity Search
+
+# When a user asks a question:
+
+# The query is converted into a vector
+
+# faiss_index.py finds nearest vectors by semantic similarity
+
+# Returns the most relevant chunks
+
+# This enables:
+
+# Meaning-based search
+
+# High recall and precision
+
+# Fast response times
+
+# 📌 Keyword matching ❌
+# 📌 Semantic similarity ✅
+
+# 3. Ensures Consistency
+
+# This file ensures:
+
+# Vectors and metadata stay aligned
+
+# Index updates don’t corrupt retrieval
+
+# Re-indexing is clean and predictable
+
+# Old or invalid vectors are removed safely
+
+# 📌 Prevents retrieval drift and stale answers.
+
+# Why FAISS Is Used Conceptually
+
+# FAISS allows:
+
+# Scalable vector search
+
+# Low-latency retrieval
+
+# High-dimensional similarity matching
+
+# It is ideal for:
+
+# FAQs
+
+# Policies
+
+# Product documentation
+
+# Support knowledge bases
+
+# Retrieval Quality Outcome
+
+# Because of this design, the bot understands meaning:
+
+# “Delivery late”
+
+# “Order delayed”
+
+# “Shipment not arrived”
+
+# → All map to the same semantic intent
+
+# 📌 This results in high-quality, reliable retrieval.
+
+# Separation of Responsibilities (Why This File Is Clean)
+# Layer	Responsibility
+# Ingestion	Data cleaning, chunking, embedding
+# Vector Store	Storage & similarity search
+# Query Pipeline	Query understanding & retrieval logic
+# Response Strategy	Answer formatting & tone
+
+# ✅ faiss_index.py does not:
+
+# Clean data
+
+# Modify text
+
+# Decide response tone
+
+# Handle business logic
+
+# 📌 This separation makes the system maintainable and scalable.
+
+# System-Level Role
+
+# faiss_index.py guarantees that:
+
+# Retrieval is accurate
+
+# Responses are grounded
+
+# Hallucinations are minimized
+
+# Follow-up questions work correctly
+
+# One-Line Summary (Docs / Interview)
+
+# faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
+
+
 import numpy as np # type: ignore
 import faiss # type: ignore
 import threading
