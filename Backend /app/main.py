@@ -102,79 +102,126 @@
 
 #     except Exception as e:
 #         print(f"\nSystem Error: {e}")
-
-
 import os
+import uuid
 import numpy as np
+
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
 from app.ingestion.metadata_enricher import MetadataEnricher
 from app.ingestion.ingestion_manager import IngestionManager
+
 from app.vector_store.faiss_index import FAISSIndex
+
 from app.query_pipeline.query_preprocess import QueryPreprocessor
+
+from app.query_pipeline.human_features import HumanFeatureExtractor
 from app.intent_detection.intent_classifier import IntentClassifier
 from app.intent_detection.intent_features import IntentFeaturesExtractor
-from app.reasoning.llm_reasoner import LLMReasoner
+
 from app.reasoning.response_generator import ResponseGenerator
 from app.validation.answer_validator import AnswerValidator
 from app.response_strategy import select_response_strategy
 
+
+# ---------------- CONFIG ---------------- #
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
+
+# ---------------- INIT ---------------- #
 def initialize_system():
-    try:
-        if not os.path.exists(data_path):
-            raise FileNotFoundError(f"Missing knowledge base: {data_path}")
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Missing knowledge base: {data_path}")
 
-        source = DataSource(data_path)
-        source.load_data()
-        
-        processor = Preprocessor()
-        processed_docs = processor.transform_documents(source.get_documents())
+    source = DataSource(data_path)
+    source.load_data()
 
-        embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        vectors = embedder.embed_documents(processed_docs)
-        vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
+    processor = Preprocessor()
+    processed_docs = processor.transform_documents(source.get_documents())
 
-        metadata = [doc.metadata for doc in processed_docs]
-        chunks = [doc.page_content for doc in processed_docs]
-        
-        index = FAISSIndex(vectors, chunks, metadata)
-        
-        return index, embedder, processor
-    except Exception as e:
-        print(f"Startup Failed: {e}")
-        exit(1)
+    embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    vectors = embedder.embed_documents(processed_docs)
+    vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
 
-faiss_index, embedder, doc_processor = initialize_system()
-classifier = IntentClassifier(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+    metadata = [doc.metadata for doc in processed_docs]
+    chunks = [doc.page_content for doc in processed_docs]
+
+    index = FAISSIndex(vectors, chunks, metadata)
+    return index, embedder
+
+
+faiss_index, embedder = initialize_system()
+
 query_processor = QueryPreprocessor()
+intent_classifier = IntentClassifier(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+intent_feature_extractor = IntentFeaturesExtractor()
+
 generator = ResponseGenerator()
 validator = AnswerValidator()
+
+# Unique session for conversation memory
+SESSION_ID = str(uuid.uuid4())
+
 
 print("\n--- AI Support System Ready (Jessica) ---")
 print("Type 'exit' to quit.\n")
 
+
+# ---------------- CHAT LOOP ---------------- #
 while True:
     try:
-        user_input = input("Customer: ").strip()
+        user_input = input("Customer   : ").strip()
+        print("\n")
         if user_input.lower() in {"exit", "quit", "q"}:
             break
         if not user_input:
             continue
 
+        # --- Query preprocessing ---
         query_data = query_processor.invoke(user_input)
-        intent_data = classifier.classify(query_data["clean_text"])
-        features = {**query_data, **intent_data}
 
+        # --- Human features (emotion, urgency, follow-up memory) ---
+        human_features = HumanFeatureExtractor.extract(
+            query=query_data["clean_text"],
+            session_id=SESSION_ID
+        )
+
+        # --- Intent classification ---
+        intent_data = intent_classifier.classify(query_data["clean_text"])
+
+        # --- Intent feature extraction (follow-up aware) ---
+        intent_features = intent_feature_extractor.extract(
+            query=query_data["clean_text"],
+            previous_context={
+                "intent_topic": human_features.get("previous_topic"),
+                "question_type": human_features.get("previous_intent")
+            }
+        )
+
+        # --- Merge features ---
+        features = {
+            **query_data,
+            **intent_data,
+            **intent_features,
+            **human_features
+        }
+
+        # --- Strategy selection ---
         system_strategy = select_response_strategy(features)
+
+        # --- Embedding + Retrieval ---
         query_vector = embedder.embed_query(query_data["clean_text"])
         query_vector = np.atleast_2d(np.array(query_vector, dtype="float32"))
-        
-        retrieval_result = faiss_index.retrieve(query_vector, intent=features.get("intent"))
-        context_text = "\n\n".join(retrieval_result["docs"])
 
+        retrieval = faiss_index.retrieve(
+            query_vector=query_vector,
+            intent=features.get("intent", "unknown")
+        )
+
+        context_text = "\n\n".join(retrieval.get("docs", []))
+
+        # --- Generation (STRICT grounding) ---
         answer = generator.generate({
             "query": user_input,
             "context": context_text,
@@ -182,19 +229,31 @@ while True:
             "intent": features.get("intent"),
             "emotion": features.get("emotion"),
             "urgency": features.get("urgency"),
-            "complexity": features.get("complexity")
+            "follow_up": features.get("follow_up", False)
         })
 
-        validation_result = validator.invoke({
+        # --- Validation ---
+        validation = validator.invoke({
             "answer": answer,
             "intent": features.get("intent"),
             "emotion": features.get("emotion")
         })
 
-        if validation_result.get("valid", True):
-            print(f"AI Support Jessica: {answer}")
+        # --- Output control ---
+        print("Jessica   :", answer)
+        print("\n")
+        if validation["confidence"] < 0.2:
+            print("AI Support Jessica: I’m not fully sure. Could you please clarify?")
+            print("\n")
+            print("issues :", validation["issues"])
+            print("confidence :", validation["confidence"])
+            print("\n")
         else:
-            print(f"AI Support Jessica (Low Confidence): {answer}")
+            print("AI Support Jessica:", answer)
+            print("\n")
+            print("issues :", validation["issues"])
+            print("confidence :", validation["confidence"])
+            print("\n")
 
     except Exception as e:
         print(f"\nSystem Error: {e}")

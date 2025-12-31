@@ -19,40 +19,44 @@
 # - Required data: Order policy + delivery timelines
 #
 # This step produces intent and sentiment features, not an answer.
-
 import threading
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory  # type: ignore
 
 DetectorFactory.seed = 0
 
-URGENT_KEYWORDS = {"now", "urgent", "asap", "immediately", "today", "tomorrow", "right away"}
-FRUSTRATION_KEYWORDS = {"angry", "frustrated", "annoyed", "ridiculous", "worst", "not working", "failed"}
+FOLLOWUP_KEYWORDS = {"that", "it", "this", "those", "same", "continue", "what about", "and then"}
 
 class IntentFeaturesExtractor:
     def __init__(self):
         self._lock = threading.Lock()
 
-    def extract(self, query: str) -> Dict[str, Any]:
+    def extract(self, query: str, previous_context: Dict[str, Any] | None = None) -> Dict[str, Any]:
         with self._lock:
             if not query or not query.strip():
                 return self._default_response()
 
             lowered = query.lower()
-            is_urgent = any(word in lowered for word in URGENT_KEYWORDS)
-            is_frustrated = any(word in lowered for word in FRUSTRATION_KEYWORDS)
+            is_followup = any(k in lowered for k in FOLLOWUP_KEYWORDS) or len(lowered.split()) <= 4
 
             try:
                 language = detect(query)
             except:
                 language = "unknown"
 
+            # Detect fresh intent
+            intent_topic = self._detect_topic(lowered)
+            question_type = self._detect_question_type(lowered)
+
+            # FOLLOW-UP OVERRIDE
+            if is_followup and previous_context:
+                intent_topic = previous_context.get("intent_topic", intent_topic)
+                question_type = previous_context.get("question_type", question_type)
+
             return {
-                "intent_topic": self._detect_topic(lowered),
-                "question_type": self._detect_question_type(lowered),
-                "urgency": "high" if is_urgent else "low",
-                "emotion": "frustrated" if is_frustrated else "neutral",
-                "sentiment_score": -0.8 if is_frustrated else 0.0,
+                "intent_topic": intent_topic,
+                "question_type": question_type,
+                "follow_up": is_followup,
                 "language": language
             }
 
@@ -80,8 +84,6 @@ class IntentFeaturesExtractor:
         return {
             "intent_topic": "general",
             "question_type": "general",
-            "urgency": "low",
-            "emotion": "neutral",
-            "sentiment_score": 0.0,
+            "follow_up": False,
             "language": "unknown"
         }

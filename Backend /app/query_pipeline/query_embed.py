@@ -27,10 +27,9 @@
 # * Filters **outdated or irrelevant** information
 
 # 📌 This step is critical for **hallucination prevention**.
-
-
 import threading
 from typing import List
+
 
 class QueryEmbedder:
     def __init__(self, model):
@@ -39,13 +38,28 @@ class QueryEmbedder:
 
     def embed(self, query_text: str) -> List[float]:
         with self._lock:
-            try:
-                if not query_text or not query_text.strip():
-                    raise ValueError("Query text cannot be empty for embedding")
-                
-                return self.model.embed_query(query_text)
-                
-            except ValueError as ve:
-                raise RuntimeError(f"Validation Error: {ve}")
-            except Exception as e:
-                raise RuntimeError(f"Model Embedding Failed: {e}")
+            query = self._normalize(query_text)
+
+            if not query:
+                raise ValueError("Empty query after normalization")
+
+            return self.model.embed_query(query)
+
+    def _normalize(self, text: str) -> str:
+        text = text.strip().lower()
+
+        # Remove noise
+        for ch in ["?", "!", ".", ",", ";"]:
+            text = text.replace(ch, "")
+
+        # Normalize common user phrasing
+        replacements = {
+            "who is": "",
+            "tell me about": "",
+            "can you explain": "",
+        }
+
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+
+        return text.strip()
