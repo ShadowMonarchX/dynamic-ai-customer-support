@@ -1,3 +1,31 @@
+# ## Step 4: Context Selection & Validation
+
+# ### Folder
+
+# `query_pipeline/`
+
+# ### File Involved
+
+# * `context_assembler.py`
+
+# ### What Happens Here
+
+# From the retrieved documents, the bot:
+
+# * Selects the **most accurate sections**
+# * Removes **duplicate content**
+# * Resolves **conflicting policies or answers**
+# * Ensures **policy consistency**
+
+# ### If Data Is Missing
+
+# * Bot provides a **safe fallback response**, or
+# * Bot asks a **clarifying question** instead of guessing
+
+# This step ensures **answer reliability**.
+
+
+
 import threading
 from typing import List, Optional, Dict, Any
 from langchain_core.documents import Document # type: ignore
