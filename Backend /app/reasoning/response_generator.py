@@ -121,8 +121,8 @@ class ResponseGenerator:
                     "intent": data.get("intent", "unknown"),
                     "emotion": data.get("emotion", "neutral"),
                     "urgency": data.get("urgency", "low"),
-                    "complexity":data.get("complexity", "small"),
-                    "answer_size":size_rule,
+                    "complexity": data.get("complexity", "small"),
+                    "answer_size": size_rule,
                 }
 
                 answer = self.reasoner.invoke(llm_input)

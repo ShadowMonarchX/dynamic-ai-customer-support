@@ -43,7 +43,7 @@
 #         # Greeting detection
 #         if lowered in {"hi", "hello", "hey"}:
 #             result.update({"intent": "greeting", "emotion": "neutral", "urgency": "low", "complexity": "small", "confidence": 0.95})
-        
+
 #         # Identity lookup
 #         elif any(word in lowered for word in {"who", "what", "whose"}) :
 #             result.update({"intent": "identity_lookup", "confidence": 0.9, "complexity": "small"})
@@ -60,7 +60,7 @@
 #         if any(w in lowered for w in FRUSTRATION_KEYWORDS):
 #             result["emotion"] = "frustrated"
 #             result["urgency"] = "high"
-        
+
 #         if any(w in lowered for w in URGENT_KEYWORDS):
 #             result["urgency"] = "high"
 
@@ -96,14 +96,14 @@
 #             if not message or not message.strip():
 #                 return result
 
-            
+
 #             result.update(self._apply_basic_rules(message))
 
-            
+
 #             human_features = self._extract_human_features(message)
 #             result.update(human_features)
 
-            
+
 #             if result.get("intent") == "unknown":
 #                 try:
 #                     chain = self.prompt | self.llm | self.parser
@@ -112,7 +112,7 @@
 #                 except Exception:
 #                     pass  # fail-safe
 
-           
+
 #             if result["intent"] not in INTENTS:
 #                 result["intent"] = "unknown"
 #             if result["emotion"] not in EMOTIONS:
@@ -137,14 +137,38 @@ import logging
 
 DetectorFactory.seed = 0
 
-INTENTS = {"greeting", "identity_lookup", "service_query", "contact_request", "transactional", "unknown"}
+INTENTS = {
+    "greeting",
+    "identity_lookup",
+    "service_query",
+    "contact_request",
+    "transactional",
+    "unknown",
+}
 EMOTIONS = {"neutral", "frustrated", "angry", "urgent", "stressed"}
-URGENT_KEYWORDS = {"now", "urgent", "asap", "immediately", "today", "tomorrow", "right away"}
-FRUSTRATION_KEYWORDS = {"angry", "frustrated", "annoyed", "ridiculous", "worst", "not working", "failed"}
+URGENT_KEYWORDS = {
+    "now",
+    "urgent",
+    "asap",
+    "immediately",
+    "today",
+    "tomorrow",
+    "right away",
+}
+FRUSTRATION_KEYWORDS = {
+    "angry",
+    "frustrated",
+    "annoyed",
+    "ridiculous",
+    "worst",
+    "not working",
+    "failed",
+}
 CONFIDENCE_THRESHOLD = 0.6
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IntentClassifier")
+
 
 class IntentClassifier:
     def __init__(self, model_name: str = "mistral"):
@@ -163,8 +187,8 @@ class IntentClassifier:
             input_variables=["message"],
             partial_variables={
                 "intents": ", ".join(INTENTS),
-                "emotions": ", ".join(EMOTIONS)
-            }
+                "emotions": ", ".join(EMOTIONS),
+            },
         )
 
     def _apply_basic_rules(self, text: str) -> Dict[str, Any]:
@@ -172,15 +196,39 @@ class IntentClassifier:
         result = {}
 
         if lowered in {"hi", "hello", "hey"}:
-            result = {"intent": "greeting", "emotion": "neutral", "urgency": "low", "complexity": "small", "confidence": 0.95}
+            result = {
+                "intent": "greeting",
+                "emotion": "neutral",
+                "urgency": "low",
+                "complexity": "small",
+                "confidence": 0.95,
+            }
         elif lowered.startswith("who is"):
-            result = {"intent": "identity_lookup", "confidence": 0.9, "complexity": "small"}
-        elif any(w in lowered for w in {"service", "offer", "provide", "work", "do you"}):
-            result = {"intent": "service_query", "confidence": 0.85, "complexity": "medium"}
+            result = {
+                "intent": "identity_lookup",
+                "confidence": 0.9,
+                "complexity": "small",
+            }
+        elif any(
+            w in lowered for w in {"service", "offer", "provide", "work", "do you"}
+        ):
+            result = {
+                "intent": "service_query",
+                "confidence": 0.85,
+                "complexity": "medium",
+            }
         elif any(w in lowered for w in {"contact", "email", "call"}):
-            result = {"intent": "contact_request", "confidence": 0.85, "complexity": "small"}
+            result = {
+                "intent": "contact_request",
+                "confidence": 0.85,
+                "complexity": "small",
+            }
         elif any(w in lowered for w in {"order", "refund", "cancel", "track"}):
-            result = {"intent": "transactional", "confidence": 0.85, "complexity": "medium"}
+            result = {
+                "intent": "transactional",
+                "confidence": 0.85,
+                "complexity": "medium",
+            }
 
         if any(w in lowered for w in FRUSTRATION_KEYWORDS):
             result["emotion"] = "frustrated"
@@ -199,15 +247,28 @@ class IntentClassifier:
 
         return {
             "language": language,
-            "emotion": "frustrated" if any(w in lowered for w in FRUSTRATION_KEYWORDS) else "neutral",
+            "emotion": (
+                "frustrated"
+                if any(w in lowered for w in FRUSTRATION_KEYWORDS)
+                else "neutral"
+            ),
             "urgency": "high" if any(w in lowered for w in URGENT_KEYWORDS) else "low",
-            "sentiment_score": -0.8 if any(w in lowered for w in FRUSTRATION_KEYWORDS) else 0.0
+            "sentiment_score": (
+                -0.8 if any(w in lowered for w in FRUSTRATION_KEYWORDS) else 0.0
+            ),
         }
 
     def classify(self, message: str) -> Dict[str, Any]:
         with self._lock:
-            result = {"intent": "unknown", "emotion": "neutral", "urgency": "low", "complexity": "small",
-                      "language": "unknown", "sentiment_score": 0.0, "confidence": 0.0}
+            result = {
+                "intent": "unknown",
+                "emotion": "neutral",
+                "urgency": "low",
+                "complexity": "small",
+                "language": "unknown",
+                "sentiment_score": 0.0,
+                "confidence": 0.0,
+            }
 
             if not message or not message.strip():
                 return result
@@ -235,5 +296,7 @@ class IntentClassifier:
             if result["complexity"] not in {"small", "medium", "big"}:
                 result["complexity"] = "small"
 
-            logger.info(f"Detected intent: {result['intent']}, confidence: {result['confidence']}")
+            logger.info(
+                f"Detected intent: {result['intent']}, confidence: {result['confidence']}"
+            )
             return result
