@@ -1,69 +1,102 @@
-# app/response_strategy.py
+from abc import ABC, abstractmethod
+from typing import Dict
 
-class ResponseStrategy:
+
+# -----------------------------
+# Base Class
+# -----------------------------
+class BaseResponseStrategy(ABC):
     """
-    Class to select system response strategy based on
-    intent, emotion, urgency, and context.
+    Base class for all response strategies.
+    Defines HOW LLM should respond, not the answer content.
     """
 
-    def __init__(self):
-        # Define strategy templates
-        self.strategies = {
-            "identity_safe": "Answer strictly based on verified identity knowledge. Do not speculate.",
-            "knowledge_missing": "You don't have enough information. Ask the user for clarification politely.",
-            "default": "Answer helpfully and professionally based on available knowledge.",
-            "urgent_emotion": "Prioritize urgent, empathetic responses.",
-            "calm_emotion": "Provide detailed, informative responses at a calm pace."
-        }
+    @abstractmethod
+    def is_applicable(self, features: Dict) -> bool:
+        """Check if this strategy applies to the current features"""
+        pass
 
-        # Mapping: intent + emotion → strategy
-        self.mapping = {
-            ("identity_lookup", "neutral"): "identity_safe",
-            ("identity_lookup", "curious"): "identity_safe",
-            ("general_query", "confused"): "knowledge_missing",
-            ("general_query", "neutral"): "default",
-            ("general_query", "urgent"): "urgent_emotion",
-            ("general_query", "calm"): "calm_emotion"
-        }
-
-    def select(self, features: dict) -> str:
-        """
-        Selects the response strategy based on features.
-        Args:
-            features (dict): Dictionary containing
-                             'intent', 'emotion', 'urgency', 'follow_up'
-        Returns:
-            str: Selected system prompt strategy
-        """
-        intent = features.get("intent", "general_query")
-        emotion = features.get("emotion", "neutral")
-        urgency = features.get("urgency", "normal")
-
-        # Predictive mapping: intent + emotion
-        key = (intent, emotion)
-        strategy_key = self.mapping.get(key, "default")
-
-        # Risk-aware override: if info is missing
-        if features.get("knowledge_missing", False):
-            strategy_key = "knowledge_missing"
-
-        # Urgency-aware override
-        if urgency == "high" and strategy_key not in ["identity_safe", "knowledge_missing"]:
-            strategy_key = "urgent_emotion"
-
-        return self.strategies.get(strategy_key, self.strategies["default"])
+    @abstractmethod
+    def system_prompt(self, features: Dict) -> str:
+        """Return the system-level instructions for LLM"""
+        pass
 
 
-# Example usage
-if __name__ == "__main__":
-    strategy_selector = ResponseStrategy()
+# -----------------------------
+# Concrete Strategies
+# -----------------------------
+class GreetingStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return features.get("is_greeting", False)
 
-    features_example = {
-        "intent": "identity_lookup",
-        "emotion": "neutral",
-        "urgency": "normal",
-        "knowledge_missing": False
-    }
+    def system_prompt(self, features: Dict) -> str:
+        return (
+            "You are a professional customer support assistant. "
+            "Respond with a brief, friendly greeting (max 15 words) "
+            "and ask how you can help. Do not add extra information."
+        )
 
-    selected_strategy = strategy_selector.select(features_example)
-    print("Selected Strategy:", selected_strategy)
+
+class EmotionStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return features.get("emotion") in {"angry", "frustrated"}
+
+    def system_prompt(self, features: Dict) -> str:
+        emotion = features.get("emotion", "frustrated")
+        return (
+            f"The user is feeling {emotion}. "
+            "Acknowledge their frustration in the first sentence. "
+            "Use a calm, empathetic tone. "
+            "Focus on resolving the issue using verified information only."
+        )
+
+
+class FAQStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return features.get("intent") in {"faq", "services", "skills", "about", "contact"}
+
+    def system_prompt(self, features: Dict) -> str:
+        return (
+            "You are a knowledgeable support assistant. "
+            "Answer using ONLY the provided context. "
+            "Use bullet points or steps if helpful. "
+            "If the answer is missing, say you don't have that information. "
+            "Keep the response under 150 words."
+        )
+
+
+class TransactionalStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return features.get("intent") in {"order", "payment", "refund", "delivery", "transaction"}
+
+    def system_prompt(self, features: Dict) -> str:
+        return (
+            "You are a professional customer support agent. "
+            "Provide a clear, factual response based strictly on retrieved data. "
+            "Do not make assumptions or add unnecessary explanations."
+        )
+
+
+class BigIssueStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return features.get("urgency") == "high" or features.get("complexity") == "complex"
+
+    def system_prompt(self, features: Dict) -> str:
+        return (
+            "This is a high-priority or complex issue. "
+            "Reassure the user that the issue is being taken seriously. "
+            "Explain clearly what can be done now. "
+            "If unresolved, guide the user toward escalation or next steps."
+        )
+
+
+class FallbackStrategy(BaseResponseStrategy):
+    def is_applicable(self, features: Dict) -> bool:
+        return True  # Always applicable as last resort
+
+    def system_prompt(self, features: Dict) -> str:
+        return (
+            "You are a cautious customer support assistant. "
+            "If the information is unclear or missing, "
+            "ask a short clarifying question instead of guessing."
+        )

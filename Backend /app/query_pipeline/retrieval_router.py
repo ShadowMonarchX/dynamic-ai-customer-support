@@ -11,38 +11,41 @@
 # Filters outdated or irrelevant information
 #
 # This step is critical for hallucination prevention.
-
 import threading
-from typing import List, Tuple
-from langchain_core.documents import Document  # type: ignore
-from .query_embed import QueryEmbedder  # type: ignore
+import numpy as np
+from langchain_core.documents import Document
+from .query_embed import Embedded
+from app.vector_store.faiss_index import FAISSIndex
 
 class RetrievalRouter:
-    def __init__(self, embedder: QueryEmbedder, vector_store):
+    def __init__(self, embedder: Embedded, vector_store: FAISSIndex):
         self.embedder = embedder
         self.vector_store = vector_store
         self._lock = threading.Lock()
 
-    def retrieve(self, query: str, top_k: int = 5) -> List[Tuple[Document, float]]:
-        """
-        Retrieve top_k most relevant documents for the given query.
-        Returns a list of tuples: (Document, similarity_score)
-        """
+    def retrieve(self, query: str, top_k: int = 5):
         with self._lock:
             try:
                 if not query or not query.strip():
                     return []
 
                 # Embed the query
-                query_embedding = self.embedder.embed(query)
+                query_embedding = self.embedder.embed_query(query)
+                query_vector = np.atleast_2d(np.array(query_embedding, dtype="float32"))
 
-                # Perform similarity search in the vector store
-                results = self.vector_store.similarity_search_by_vector(
-                    vector=query_embedding,
-                    k=top_k
+                import faiss
+                faiss.normalize_L2(query_vector)
+
+                # Retrieve from FAISS
+                retrieval = self.vector_store.retrieve(
+                    query_vector=query_vector,
+                    intent="unknown",
+                    query_text=query,
+                    max_chunks=top_k
                 )
 
-                # results is expected to be List[Tuple[Document, float]]
+                # Convert to list of (Document, similarity)
+                results = [(Document(page_content=doc), 1.0) for doc in retrieval.get("docs", [])]
                 return results
 
             except Exception as e:

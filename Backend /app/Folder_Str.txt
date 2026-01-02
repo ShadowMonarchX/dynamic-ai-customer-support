@@ -6,10 +6,11 @@ __init__.py
 1. Ingestion Folder (ingestion/)
 These files handle the Offline Timeline (Cleaning, Feature Engineering for Metadata, and Chunking).
 
+
 data_load.py (Reads your 500,000-character .txt file)
-
 preprocessing.py (Cleans the text and tags headers)
-
+ingestion_manager.py
+metadata_enricher.py 
 embedding.py (Handles the transformation of chunks into vectors)
 
 __init__.py
@@ -17,20 +18,22 @@ __init__.py
 2. Intent Detection Folder (intent_detection/)
 These files handle Pre-Retrieval Feature Engineering.
 
+
 intent_classifier.py (Detects if a user is angry or asking a specific question)
+intent_classifier.py
+
 
 __init__.py
+
 
 3. Query Pipeline Folder (query_pipeline/)
 These files handle Online Preprocessing and Retrieval.
 
 query_preprocess.py (Cleans the user's question to match your database style)
-
 human_featuress.py 
-
 query_embed.py (Turns the user's query into a vector)
-
 context_assembler.py (Gathers the chunks found in the search)
+
 
 __init__.py
 
@@ -43,8 +46,8 @@ __init__.py
 
 5. Reasoning Folder (reasoning/)
 
-llm_reasoner.py (The "brain" that generates the final answer using the retrieved chunks)
 
+llm_reasoner.py (The "brain" that generates the final answer using the retrieved chunks)
 response_generator.py
 
 __init__.py
@@ -52,35 +55,17 @@ __init__.py
 6. Response Strategy Folder (response_strategy/)
 These files use Features to decide how to talk to the customer.
 
-greeting_response.py
+response_generator.py
+response_strategy.py
 
-emotion_response.py (Used if the sentiment feature is "Angry")
-
-faq_response.py
-
-transactional_response.py
-
-big_issue_response.py
 
 __init__.py
 
-7. Transaction Handlers (transaction_handlers/)
-account_support.py
 
-order_lookup.py
 
-refund_handler.py
+7. Validation Folder (validation/)
 
-__init__.py
-
-8. Validation Folder (validation/)
 answer_validator.py (Ensures the AI isn't making things up)
 
 __init__.py
 
-9. API Folder (api/)
-routes.py (The endpoints for your chatbot interface)
-
-utils.py
-
-__init__.py
