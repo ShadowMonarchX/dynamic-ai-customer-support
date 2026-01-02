@@ -33,24 +33,24 @@ class AnswerValidator(Runnable):
                 rules = INTENT_RULES.get(intent, INTENT_RULES["unknown"])
                 issues = []
 
-                # ✅ Length checks
+               
                 length = len(answer)
                 if length < rules["min_len"]:
                     issues.append("too_short")
                 if length > rules["max_len"]:
                     issues.append("too_long")
 
-                # ✅ Detect guessing
+               
                 if self._contains_guessing(answer):
                     issues.append("guessing_language")
 
-                # ✅ Confidence calculation
+            
                 confidence = self._calculate_confidence(issues, similarity)
 
-                # ✅ Human-readable trust messages
+            
                 trust_message = self._generate_trust_message(confidence, issues)
 
-                # ✅ HARD FAILSAFE for extremely weak similarity
+    
                 if similarity < 0.25 or confidence < 0.2:
                     return self._fallback(
                         "Low semantic match",
