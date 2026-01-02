@@ -179,22 +179,23 @@ from typing import List, Dict, Any
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+
 class Preprocessor:
     def __init__(self, chunk_size: int = 900, chunk_overlap: int = 200):
         self._lock = threading.Lock()
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
-            separators=["\n### ", "\n\n", ". ", "\n", " "]
+            separators=["\n### ", "\n\n", ". ", "\n", " "],
         )
-        self.noise_pattern = re.compile(r'-{3,}')
-        self.header_pattern = re.compile(r'(### .*)')
-        self.email_pattern = re.compile(r'\b[\w\.-]+@[\w\.-]+\.\w+\b')
-        self.phone_pattern = re.compile(r'\+?\d[\d\s\-]{8,}\d')
-        self.name_pattern = re.compile(r'\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\b')
+        self.noise_pattern = re.compile(r"-{3,}")
+        self.header_pattern = re.compile(r"(### .*)")
+        self.email_pattern = re.compile(r"\b[\w\.-]+@[\w\.-]+\.\w+\b")
+        self.phone_pattern = re.compile(r"\+?\d[\d\s\-]{8,}\d")
+        self.name_pattern = re.compile(r"\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\b")
 
     def _clean_content(self, text: str) -> str:
-        text = self.noise_pattern.sub('', text)
+        text = self.noise_pattern.sub("", text)
         replacements = {
             "shipping cost": "Shipping Charges",
             "delivery fee": "Shipping Charges",
@@ -202,8 +203,8 @@ class Preprocessor:
         }
         for k, v in replacements.items():
             text = re.sub(k, v, text, flags=re.IGNORECASE)
-        text = re.sub(r'[ \t]+', ' ', text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r"[ \t]+", " ", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
         return text.strip()
 
     def _derive_metadata(self, header: str) -> Dict[str, Any]:
@@ -221,9 +222,9 @@ class Preprocessor:
 
     def _is_identity_rich(self, text: str) -> bool:
         return bool(
-            self.email_pattern.search(text) or
-            self.phone_pattern.search(text) or
-            self.name_pattern.search(text)
+            self.email_pattern.search(text)
+            or self.phone_pattern.search(text)
+            or self.name_pattern.search(text)
         )
 
     def transform_documents(self, documents: List[Document]) -> List[Document]:
@@ -247,16 +248,13 @@ class Preprocessor:
                         processed_chunks.append(
                             Document(
                                 page_content=cleaned_text,
-                                metadata={**current_meta, "identity_rich": True}
+                                metadata={**current_meta, "identity_rich": True},
                             )
                         )
                         continue
                     for chunk in self.splitter.split_text(cleaned_text):
                         processed_chunks.append(
-                            Document(
-                                page_content=chunk,
-                                metadata=current_meta.copy()
-                            )
+                            Document(page_content=chunk, metadata=current_meta.copy())
                         )
             return processed_chunks
 

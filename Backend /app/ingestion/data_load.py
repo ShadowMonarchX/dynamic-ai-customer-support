@@ -46,14 +46,13 @@
 # All formats are converted into clean plain text before moving forward.
 
 
-
 # import os
 # import threading
 # from langchain_community.document_loaders import TextLoader, DirectoryLoader # type: ignore
 # from langchain_core.documents import Document # type: ignore
 
 # class DataSource:
-    
+
 #     def __init__(self, path: str, chunk_size: int = 300, chunk_overlap: int = 50):
 #         self.path = os.path.abspath(path)
 #         self.documents: list[Document] = []
@@ -117,6 +116,7 @@ import threading
 from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_core.documents import Document
 
+
 class DataSource:
     def __init__(self, path: str, chunk_size: int = 300, chunk_overlap: int = 50):
         self.path = os.path.abspath(path)
@@ -139,7 +139,7 @@ class DataSource:
                     self.path,
                     glob="**/*.txt",
                     loader_cls=TextLoader,
-                    loader_kwargs={"encoding": "utf-8"}
+                    loader_kwargs={"encoding": "utf-8"},
                 )
                 raw_docs = loader.load()
             else:
@@ -155,8 +155,7 @@ class DataSource:
                 end = min(start + self.chunk_size, len(text))
                 chunked_docs.append(
                     Document(
-                        page_content=text[start:end],
-                        metadata=dict(doc.metadata or {})
+                        page_content=text[start:end], metadata=dict(doc.metadata or {})
                     )
                 )
                 start += self.chunk_size - self.chunk_overlap

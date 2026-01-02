@@ -23,8 +23,6 @@
 # 📌 Think of this file as the conductor, not a processor.
 
 
-
-
 # import threading
 # from typing import List
 # from langchain_core.documents import Document  # type: ignore
@@ -72,14 +70,22 @@ from .preprocessing import Preprocessor
 from .embedding import Embedded
 from .metadata_enricher import MetadataEnricher
 
+
 class IngestionManager:
-    def __init__(self, preprocessor: Preprocessor, embedder: Embedded, metadata_enricher: MetadataEnricher = None):
+    def __init__(
+        self,
+        preprocessor: Preprocessor,
+        embedder: Embedded,
+        metadata_enricher: MetadataEnricher = None,
+    ):
         self._lock = threading.Lock()
         self.preprocessor = preprocessor
         self.embedder = embedder
         self.metadata_enricher = metadata_enricher
 
-    def ingest_documents(self, raw_documents: List[Document]) -> Tuple[List[Document], List[List[float]]]:
+    def ingest_documents(
+        self, raw_documents: List[Document]
+    ) -> Tuple[List[Document], List[List[float]]]:
         with self._lock:
             processed_docs = []
             for doc in raw_documents:

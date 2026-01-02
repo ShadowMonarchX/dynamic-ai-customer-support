@@ -23,7 +23,7 @@
 
 #         source = DataSource(data_path)
 #         source.load_data()
-        
+
 #         processor = Preprocessor()
 #         processed_docs = processor.transform_documents(source.get_documents())
 
@@ -33,9 +33,9 @@
 
 #         metadata = [doc.metadata for doc in processed_docs]
 #         chunks = [doc.page_content for doc in processed_docs]
-        
+
 #         index = FAISSIndex(vectors, chunks, metadata)
-        
+
 #         return index, embedder, processor
 #     except Exception as e:
 #         print(f"Startup Failed: {e}")
@@ -68,7 +68,7 @@
 #         system_strategy = select_response_strategy(features)
 #         query_vector = embedder.embed_query(query_data["clean_text"])
 #         query_vector = np.atleast_2d(np.array(query_vector, dtype="float32"))
-        
+
 #         retrieval_result = faiss_index.retrieve(query_vector, intent=features["intent"])
 #         context_text = "\n\n".join(retrieval_result["docs"])
 
@@ -104,7 +104,6 @@
 #         print(f"\nSystem Error: {e}")
 
 
-
 # import os
 # import uuid
 # import numpy as np
@@ -131,20 +130,20 @@
 # def initialize_system():
 #     if not os.path.exists(data_path):
 #         raise FileNotFoundError(f"Missing knowledge base: {data_path}")
-    
+
 #     source = DataSource(data_path)
 #     source.load_data()
-    
+
 #     processor = Preprocessor()
 #     processed_docs = processor.transform_documents(source.get_documents())
-    
+
 #     embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
 #     vectors = embedder.embed_documents(processed_docs)
 #     vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
-    
+
 #     metadata = [doc.metadata for doc in processed_docs]
 #     chunks = [doc.page_content for doc in processed_docs]
-    
+
 #     index = FAISSIndex(vectors, chunks, metadata)
 #     return index, embedder
 
@@ -261,10 +260,13 @@ from app.validation.answer_validator import AnswerValidator
 
 from app.response_strategy.response_router import ResponseStrategyRouter
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 
-data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
+data_path = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt"
+
 
 def initialize_system():
     if not os.path.exists(data_path):
@@ -280,6 +282,7 @@ def initialize_system():
     chunks = [doc.page_content for doc in processed_docs]
     index = FAISSIndex(vectors, chunks, metadata)
     return index, embedder
+
 
 faiss_index, embedder = initialize_system()
 query_processor = QueryPreprocessor()
@@ -302,14 +305,16 @@ while True:
             continue
 
         query_data = query_processor.invoke(user_input)
-        human_features = HumanFeatureExtractor.extract(query=query_data["clean_text"], session_id=SESSION_ID)
+        human_features = HumanFeatureExtractor.extract(
+            query=query_data["clean_text"], session_id=SESSION_ID
+        )
         intent_data = intent_classifier.classify(query_data["clean_text"])
         intent_features = intent_feature_extractor.extract(
             query=query_data["clean_text"],
             previous_context={
                 "intent_topic": human_features.get("previous_topic"),
-                "question_type": human_features.get("previous_intent")
-            }
+                "question_type": human_features.get("previous_intent"),
+            },
         )
 
         features = {**query_data, **intent_data, **intent_features, **human_features}
@@ -322,7 +327,7 @@ while True:
             query_vector=query_vector,
             intent=features.get("intent", "unknown"),
             query_text=query_data["clean_text"],
-            max_chunks=5
+            max_chunks=5,
         )
 
         if not retrieval.get("docs"):
@@ -330,22 +335,26 @@ while True:
             continue
 
         context_text = "\n\n".join(retrieval.get("docs", []))
-        answer = generator.generate({
-            "query": user_input,
-            "context": context_text,
-            "system_prompt": system_prompt,
-            "intent": features.get("intent"),
-            "emotion": features.get("emotion"),
-            "urgency": features.get("urgency"),
-            "follow_up": features.get("follow_up", False)
-        })
+        answer = generator.generate(
+            {
+                "query": user_input,
+                "context": context_text,
+                "system_prompt": system_prompt,
+                "intent": features.get("intent"),
+                "emotion": features.get("emotion"),
+                "urgency": features.get("urgency"),
+                "follow_up": features.get("follow_up", False),
+            }
+        )
 
-        validation = validator.invoke({
-            "answer": answer,
-            "intent": features.get("intent"),
-            "emotion": features.get("emotion"),
-            "similarity": retrieval.get("similarity", 1.0)
-        })
+        validation = validator.invoke(
+            {
+                "answer": answer,
+                "intent": features.get("intent"),
+                "emotion": features.get("emotion"),
+                "similarity": retrieval.get("similarity", 1.0),
+            }
+        )
 
         if validation["confidence"] < 0.5:
             logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
