@@ -77,7 +77,7 @@
 # * Scales safely across web and app data
 # * Delivers enterprise-grade customer support automation
 
-
+      
 
 import threading
 
@@ -94,3 +94,22 @@ class BigIssueResponse:
             3. Provide a temporary workaround if available in the context.
             4. Inform them that a human specialist may need to review this.
             """
+        
+
+
+# 6. Response Strategy Folder (response_strategy/)
+# These files use Features to decide how to talk to the customer.
+
+# greeting_response.py
+
+# emotion_response.py (Used if the sentiment feature is "Angry")
+
+# faq_response.py
+
+# transactional_response.py
+
+# big_issue_response.py
+
+# response_router.py (Decides which response strategy to use based on features)
+
+# response_strategy.py 

@@ -121,14 +121,124 @@
 
 # One-Line Summary (Docs / Interview)
 
-# faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
+# # faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
 
 
+
+# import numpy as np 
+# import faiss # Facebook AI Similarity Search 
+# import threading
+# from typing import List, Dict, Any
+
+# INTENT_TOP_K = {
+#     "greeting": 0,
+#     "identity": 2,
+#     "faq": 3,
+#     "services": 3,
+#     "skills": 3,
+#     "transactional": 2,
+#     "order": 2,
+#     "refund": 2,
+#     "big_issue": 4,
+#     "unknown": 2,
+# }
+
+# # Cosine similarity thresholds (higher is better, 1 = perfect match)
+# INTENT_SIMILARITY_THRESHOLD = {
+#     "identity": 0.65,
+#     "faq": 0.7,
+#     "services": 0.7,
+#     "skills": 0.7,
+#     "transactional": 0.6,
+#     "unknown": 0.5,
+# }
+
+
+# class FAISSIndex:
+#     def __init__(
+#         self,
+#         embeddings: np.ndarray,
+#         documents: List[Any],
+#         metadata: List[Dict[str, Any]]
+#     ):
+#         self._lock = threading.Lock()
+
+#         if embeddings is None or len(embeddings) == 0:
+#             raise ValueError("Embeddings cannot be empty")
+
+#         # Normalize embeddings for cosine similarity
+#         self.embeddings = np.atleast_2d(embeddings).astype("float32")
+#         faiss.normalize_L2(self.embeddings)
+
+#         self.documents = documents
+#         self.metadata = metadata
+
+#         self.index = faiss.IndexFlatIP(self.embeddings.shape[1])  # inner product = cosine
+#         self.index.add(self.embeddings)
+
+#     def _is_identity_query(self, intent: str, query_text: str = "") -> bool:
+#         return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
+
+#     def retrieve(self, query_vector: np.ndarray, intent: str, query_text: str = "") -> Dict[str, Any]:
+#         with self._lock:
+#             top_k = INTENT_TOP_K.get(intent, 2)
+
+#             if top_k == 0:
+#                 return {"docs": [], "count": 0, "status": "skip"}
+
+#             query_vector = np.atleast_2d(query_vector).astype("float32")
+#             faiss.normalize_L2(query_vector)
+
+#             distances, indices = self.index.search(query_vector, top_k * 5)  # over-fetch
+#             threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
+#             scored_docs = []
+
+#             for sim, idx in zip(distances[0], indices[0]):
+#                 if idx == -1:
+#                     continue
+
+#                 meta = self.metadata[idx]
+#                 weight = meta.get("confidence_weight", 1.0)
+
+#                 # Identity-first filtering
+#                 if self._is_identity_query(intent, query_text):
+#                     if not meta.get("identity_rich") and meta.get("content_type") != "identity":
+#                         continue
+
+#                 # Intent-specific topic filtering
+#                 if intent in {"order", "refund", "transactional"}:
+#                     if meta.get("topic") not in {"order", "billing", "refund"}:
+#                         continue
+
+#                 if meta.get("status") == "deprecated":
+#                     continue
+
+#                 # Apply threshold
+#                 if sim < threshold:
+#                     continue
+
+#                 # Score = similarity * confidence weight (higher is better)
+#                 final_score = sim * weight
+#                 scored_docs.append((final_score, self.documents[idx]))
+
+#             scored_docs.sort(key=lambda x: x[0], reverse=True)
+#             selected_docs = [doc for _, doc in scored_docs[:top_k]]
+
+#             if not selected_docs:
+#                 print(f"[FAISS Warning] Empty retrieval. Intent: {intent}, Query: '{query_text}'")
+#                 print(f"Top similarities: {distances[0][:5]}")
+
+#             return {
+#                 "docs": selected_docs,
+#                 "count": len(selected_docs),
+#                 "status": "success" if selected_docs else "empty"
+#             }
 
 import numpy as np
 import faiss
 import threading
 from typing import List, Dict, Any
+
 
 INTENT_TOP_K = {
     "greeting": 0,
@@ -143,7 +253,6 @@ INTENT_TOP_K = {
     "unknown": 2,
 }
 
-# Cosine similarity thresholds (higher is better, 1 = perfect match)
 INTENT_SIMILARITY_THRESHOLD = {
     "identity": 0.65,
     "faq": 0.7,
@@ -159,77 +268,96 @@ class FAISSIndex:
         self,
         embeddings: np.ndarray,
         documents: List[Any],
-        metadata: List[Dict[str, Any]]
+        metadata: List[Dict[str, Any]],
+        hnsw_m: int = 32,
+        ef_search: int = 64,
+        ef_construction: int = 200
     ):
         self._lock = threading.Lock()
 
         if embeddings is None or len(embeddings) == 0:
             raise ValueError("Embeddings cannot be empty")
 
-        # Normalize embeddings for cosine similarity
-        self.embeddings = np.atleast_2d(embeddings).astype("float32")
-        faiss.normalize_L2(self.embeddings)
+        embeddings = np.atleast_2d(embeddings).astype("float32")
 
+        if len(embeddings) != len(documents) or len(embeddings) != len(metadata):
+            raise ValueError("Embeddings, documents, and metadata size mismatch")
+
+        faiss.normalize_L2(embeddings)
+
+        self.embeddings = embeddings
         self.documents = documents
         self.metadata = metadata
 
-        self.index = faiss.IndexFlatIP(self.embeddings.shape[1])  # inner product = cosine
-        self.index.add(self.embeddings)
+        dim = embeddings.shape[1]
 
-    def _is_identity_query(self, intent: str, query_text: str = "") -> bool:
+        self.index = faiss.IndexHNSWFlat(dim, hnsw_m, faiss.METRIC_INNER_PRODUCT)
+        self.index.hnsw.efSearch = ef_search
+        self.index.hnsw.efConstruction = ef_construction
+
+        with self._lock:
+            self.index.add(self.embeddings)
+
+    def _is_identity_query(self, intent: str, query_text: str) -> bool:
         return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
 
-    def retrieve(self, query_vector: np.ndarray, intent: str, query_text: str = "") -> Dict[str, Any]:
+    def retrieve(
+        self,
+        query_vector: np.ndarray,
+        intent: str,
+        query_text: str = ""
+    ) -> Dict[str, Any]:
+
+        top_k = INTENT_TOP_K.get(intent, 2)
+        if top_k == 0:
+            return {"docs": [], "count": 0, "status": "skip"}
+
+        if query_vector is None or len(query_vector) == 0:
+            raise ValueError("Query embedding is empty")
+
+        query_vector = np.atleast_2d(query_vector).astype("float32")
+
+        if query_vector.shape[1] != self.index.d:
+            raise ValueError("Query vector dimension mismatch")
+
+        faiss.normalize_L2(query_vector)
+
         with self._lock:
-            top_k = INTENT_TOP_K.get(intent, 2)
+            distances, indices = self.index.search(query_vector, top_k * 3)
 
-            if top_k == 0:
-                return {"docs": [], "count": 0, "status": "skip"}
+        threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
+        scored_docs = []
 
-            query_vector = np.atleast_2d(query_vector).astype("float32")
-            faiss.normalize_L2(query_vector)
+        for sim, idx in zip(distances[0], indices[0]):
+            if idx < 0 or idx >= len(self.documents):
+                continue
 
-            distances, indices = self.index.search(query_vector, top_k * 5)  # over-fetch
-            threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
-            scored_docs = []
+            meta = self.metadata[idx] or {}
 
-            for sim, idx in zip(distances[0], indices[0]):
-                if idx == -1:
+            if meta.get("status") == "deprecated":
+                continue
+
+            if self._is_identity_query(intent, query_text):
+                if not meta.get("identity_rich", False) and meta.get("content_type") != "identity":
                     continue
 
-                meta = self.metadata[idx]
-                weight = meta.get("confidence_weight", 1.0)
-
-                # Identity-first filtering
-                if self._is_identity_query(intent, query_text):
-                    if not meta.get("identity_rich") and meta.get("content_type") != "identity":
-                        continue
-
-                # Intent-specific topic filtering
-                if intent in {"order", "refund", "transactional"}:
-                    if meta.get("topic") not in {"order", "billing", "refund"}:
-                        continue
-
-                if meta.get("status") == "deprecated":
+            if intent in {"order", "refund", "transactional"}:
+                if meta.get("topic", "general") not in {"order", "billing", "refund"}:
                     continue
 
-                # Apply threshold
-                if sim < threshold:
-                    continue
+            if sim < threshold:
+                continue
 
-                # Score = similarity * confidence weight (higher is better)
-                final_score = sim * weight
-                scored_docs.append((final_score, self.documents[idx]))
+            weight = float(meta.get("confidence_weight", 1.0))
+            weight = max(0.1, min(weight, 2.0))
 
-            scored_docs.sort(key=lambda x: x[0], reverse=True)
-            selected_docs = [doc for _, doc in scored_docs[:top_k]]
+            scored_docs.append((sim * weight, self.documents[idx]))
 
-            if not selected_docs:
-                print(f"[FAISS Warning] Empty retrieval. Intent: {intent}, Query: '{query_text}'")
-                print(f"Top similarities: {distances[0][:5]}")
+        scored_docs.sort(key=lambda x: x[0], reverse=True)
+        selected_docs = [doc for _, doc in scored_docs[:top_k]]
 
-            return {
-                "docs": selected_docs,
-                "count": len(selected_docs),
-                "status": "success" if selected_docs else "empty"
-            }
+        return {
+            "docs": selected_docs,
+            "count": len(selected_docs),
+            "status": "success" if selected_docs else "empty"
+        }

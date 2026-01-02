@@ -10,6 +10,10 @@ data_load.py (Reads your 500,000-character .txt file)
 
 preprocessing.py (Cleans the text and tags headers)
 
+ingestion_manager.py
+
+metadata_enricher.py 
+
 embedding.py (Handles the transformation of chunks into vectors)
 
 __init__.py
@@ -18,6 +22,8 @@ __init__.py
 These files handle Pre-Retrieval Feature Engineering.
 
 intent_classifier.py (Detects if a user is angry or asking a specific question)
+
+intent_classifier.py
 
 __init__.py
 
@@ -31,6 +37,7 @@ human_featuress.py
 query_embed.py (Turns the user's query into a vector)
 
 context_assembler.py (Gathers the chunks found in the search)
+
 
 __init__.py
 

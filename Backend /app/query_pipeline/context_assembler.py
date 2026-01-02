@@ -10,11 +10,13 @@
 # - Or asks a clarifying question instead of guessing
 #
 # This step ensures answer reliability.
+
+
 import threading
 from typing import List, Dict, Any
-from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.documents import Document # type: ignore
+from langchain_core.prompts import ChatPromptTemplate # type: ignore
+from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
 
 
 class ContextAssembler:
