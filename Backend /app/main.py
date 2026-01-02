@@ -330,7 +330,10 @@ while True:
             max_chunks=5,
         )
 
+        print("retrieval :", retrieval)
+        
         if not retrieval.get("docs"):
+            print("Hello - 1")
             logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
             continue
 
@@ -357,14 +360,15 @@ while True:
         )
 
         if validation["confidence"] < 0.5:
+            print("Hello - 2")
             logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
         else:
             logging.info("Jessica: %s\n", answer)
-        print("--------------------------------1")
+        print("Hello - 3")
         logging.info("issues : %s", validation["issues"])
         logging.info("confidence : %s\n", validation["confidence"])
 
     except Exception as e:
         print(f"\nSystem Error: {e}")
-        print("\n--------------------------------\n")
+        print("Hello - 4")
         logging.error("System Error: %s", e)
