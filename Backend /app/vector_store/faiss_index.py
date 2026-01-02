@@ -301,14 +301,12 @@ class FAISSIndex:
     def _is_identity_query(self, intent: str, query_text: str) -> bool:
         return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
 
-    def retrieve(
-        self,
-        query_vector: np.ndarray,
-        intent: str,
-        query_text: str = ""
-    ) -> Dict[str, Any]:
-
+    def retrieve(self,query_vector: np.ndarray,intent: str,query_text: str = "",max_chunks: int = None ) -> Dict[str, Any]:
+        # Use max_chunks if provided
         top_k = INTENT_TOP_K.get(intent, 2)
+        if max_chunks is not None:
+            top_k = max_chunks
+
         if top_k == 0:
             return {"docs": [], "count": 0, "status": "skip"}
 
@@ -322,8 +320,8 @@ class FAISSIndex:
 
         faiss.normalize_L2(query_vector)
 
-        with self._lock:
-            distances, indices = self.index.search(query_vector, top_k * 3)
+        # Read-only search does NOT need lock
+        distances, indices = self.index.search(query_vector, top_k * 5)  # over-fetch for safety
 
         threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
         scored_docs = []
@@ -341,9 +339,15 @@ class FAISSIndex:
                 if not meta.get("identity_rich", False) and meta.get("content_type") != "identity":
                     continue
 
-            if intent in {"order", "refund", "transactional"}:
-                if meta.get("topic", "general") not in {"order", "billing", "refund"}:
-                    continue
+            # Intent-topic mapping instead of hard-coded
+            intent_topic_map = {
+                "order": {"order", "billing", "refund"},
+                "refund": {"order", "billing", "refund"},
+                "transactional": {"order", "billing", "refund"},
+            }
+            allowed_topics = intent_topic_map.get(intent, None)
+            if allowed_topics and meta.get("topic", "general") not in allowed_topics:
+                continue
 
             if sim < threshold:
                 continue

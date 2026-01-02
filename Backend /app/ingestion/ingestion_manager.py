@@ -65,7 +65,6 @@
 #         # Re-ingestion for updated or changed data
 #         return self.ingest_documents(raw_documents)
 
-
 import threading
 from typing import List, Tuple
 from langchain_core.documents import Document
@@ -73,14 +72,8 @@ from .preprocessing import Preprocessor
 from .embedding import Embedded
 from .metadata_enricher import MetadataEnricher
 
-
 class IngestionManager:
-    def __init__(
-        self,
-        preprocessor: Preprocessor,
-        embedder: Embedded,
-        metadata_enricher: MetadataEnricher = None
-    ):
+    def __init__(self, preprocessor: Preprocessor, embedder: Embedded, metadata_enricher: MetadataEnricher = None):
         self._lock = threading.Lock()
         self.preprocessor = preprocessor
         self.embedder = embedder
@@ -89,7 +82,6 @@ class IngestionManager:
     def ingest_documents(self, raw_documents: List[Document]) -> Tuple[List[Document], List[List[float]]]:
         with self._lock:
             processed_docs = []
-
             for doc in raw_documents:
                 try:
                     chunks = self.preprocessor.transform_documents([doc])
@@ -98,21 +90,18 @@ class IngestionManager:
                     processed_docs.extend(chunks)
                 except Exception:
                     continue
-
             if not processed_docs:
                 raise RuntimeError("No valid documents to ingest")
-
             embeddings = []
             for doc in processed_docs:
                 try:
                     vec = self.embedder.embed_documents([doc])
-                    embeddings.extend(vec)
+                    if vec:
+                        embeddings.extend(vec)
                 except Exception:
                     continue
-
             if not embeddings:
                 raise RuntimeError("Embedding generation failed")
-
             return processed_docs, embeddings
 
     def refresh_documents(self, raw_documents: List[Document]):

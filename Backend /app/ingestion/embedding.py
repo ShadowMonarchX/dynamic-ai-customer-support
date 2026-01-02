@@ -129,7 +129,7 @@ import threading
 from typing import List, Union
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
-
+import torch
 
 class Embedded:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
@@ -139,16 +139,12 @@ class Embedded:
     def _apply_embedding_bias(self, text: str, metadata: dict) -> str:
         content_type = metadata.get("content_type", "general")
         identity_rich = metadata.get("identity_rich", False)
-
         if content_type == "identity" or identity_rich:
             return f"Person Profile: {text}"
-
         if content_type in {"support", "technical"}:
             return f"Support Information: {text}"
-
         if content_type in {"how_to", "guide"}:
             return f"Instructional Content: {text}"
-
         return text
 
     def _confidence_weight(self, metadata: dict) -> float:
@@ -167,7 +163,6 @@ class Embedded:
                 else Document(page_content=str(doc), metadata={})
                 for doc in documents
             ]
-
             texts = []
             for doc in docs:
                 metadata = dict(doc.metadata or {})
@@ -175,7 +170,6 @@ class Embedded:
                 metadata["confidence_weight"] = self._confidence_weight(metadata)
                 doc.metadata = metadata
                 texts.append(text)
-
             return self.embedding_model.embed_documents(texts)
 
     def embed_query(self, query: str) -> List[float]:
@@ -183,8 +177,6 @@ class Embedded:
             q = query.strip()
             if not q:
                 raise RuntimeError("Empty query")
-
             if q.lower().startswith("who is"):
                 q = f"Person Profile Query: {q}"
-
             return self.embedding_model.embed_query(q)

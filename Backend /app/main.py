@@ -241,6 +241,7 @@
 
 import os
 import uuid
+import logging
 import numpy as np
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
@@ -254,25 +255,22 @@ from app.reasoning.response_generator import ResponseGenerator
 from app.validation.answer_validator import AnswerValidator
 from app.response_strategy.response_router import ResponseStrategyRouter
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
 def initialize_system():
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Missing knowledge base: {data_path}")
-    
     source = DataSource(data_path)
     source.load_data()
-    
     processor = Preprocessor()
     processed_docs = processor.transform_documents(source.get_documents())
-    
     embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectors = embedder.embed_documents(processed_docs)
     vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
-    
     metadata = [doc.metadata for doc in processed_docs]
     chunks = [doc.page_content for doc in processed_docs]
-    
     index = FAISSIndex(vectors, chunks, metadata)
     return index, embedder
 
@@ -285,8 +283,8 @@ validator = AnswerValidator()
 strategy_router = ResponseStrategyRouter()
 SESSION_ID = str(uuid.uuid4())
 
-print("\n--- AI Support System Ready (Jessica) ---")
-print("Type 'exit' to quit.\n")
+logging.info("--- AI Support System Ready (Jessica) ---")
+logging.info("Type 'exit' to quit.\n")
 
 while True:
     try:
@@ -339,12 +337,12 @@ while True:
         })
 
         if validation["confidence"] < 0.5:
-            print("Jessica: I’m not fully sure. Could you please clarify?\n")
+            logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
         else:
-            print("Jessica:", answer, "\n")
+            logging.info("Jessica: %s\n", answer)
 
-        print("issues :", validation["issues"])
-        print("confidence :", validation["confidence"], "\n")
+        logging.info("issues : %s", validation["issues"])
+        logging.info("confidence : %s\n", validation["confidence"])
 
     except Exception as e:
-        print(f"\nSystem Error: {e}")
+        logging.error("System Error: %s", e)

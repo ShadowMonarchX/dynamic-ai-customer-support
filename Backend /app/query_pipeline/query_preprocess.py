@@ -109,7 +109,6 @@
 #             "named_entities": [],
 #             "question_depth": 0
 #         }
-
 import re
 import threading
 import logging
@@ -145,6 +144,7 @@ class QueryPreprocessor:
 
                 if not clean_text:
                     logger.warning("Query became empty after preprocessing")
+                    return self._default_response()
 
                 named_entities = self._extract_named_entities(query)
 

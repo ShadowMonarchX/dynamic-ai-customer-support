@@ -105,7 +105,6 @@
 
 #             except Exception as e:
 #                 return f"Error in reasoning chain: {str(e)}"
-
 import torch
 import threading
 from typing import Dict, Any
@@ -113,15 +112,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from langchain_huggingface import HuggingFacePipeline
 from langchain_core.prompts import PromptTemplate
 
-
 class LLMReasoner:
-    def __init__(
-        self,
-        model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        max_new_tokens: int = 256
-    ):
+    def __init__(self, model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0", max_new_tokens: int = 256):
         self._lock = threading.Lock()
-
         try:
             self.model_name = model_name
             self.max_new_tokens = max_new_tokens
@@ -137,12 +130,7 @@ class LLMReasoner:
                 dtype = torch.float32
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                torch_dtype=dtype,
-                low_cpu_mem_usage=True
-            )
+            self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=dtype, low_cpu_mem_usage=True)
 
             hf_pipeline = pipeline(
                 "text-generation",
@@ -156,31 +144,14 @@ class LLMReasoner:
             )
 
             self.llm = HuggingFacePipeline(pipeline=hf_pipeline)
-
             self.prompt = PromptTemplate(
-                input_variables=[
-                    "system_prompt",
-                    "context",
-                    "query",
-                    "intent",
-                    "emotion",
-                    "urgency",
-                    "complexity",
-                    "answer_size"
-                ],
+                input_variables=["system_prompt","context","query","intent","emotion","urgency","complexity","answer_size"],
                 template=(
-                    "<|system|>\n"
-                    "{system_prompt}\n"
-                    "Constraint: {answer_size}\n"
-                    "Context:\n{context}\n</s>\n"
-                    "<|user|>\n"
-                    "{query}\n"
-                    "Intent={intent}, Emotion={emotion}, Urgency={urgency}\n</s>\n"
-                    "<|assistant|>\n"
-                    "Answer:"
+                    "<|system|>\n{system_prompt}\nConstraint: {answer_size}\nContext:\n{context}\n</s>\n"
+                    "<|user|>\n{query}\nIntent={intent}, Emotion={emotion}, Urgency={urgency}\n</s>\n"
+                    "<|assistant|>\nAnswer:"
                 )
             )
-
             self.chain = self.prompt | self.llm
 
         except Exception as e:
@@ -191,48 +162,29 @@ class LLMReasoner:
             try:
                 query = inputs.get("query", "").strip()
                 context = inputs.get("context", "").strip()
-
-                if not query:
+                if not query or not context:
                     return "I’m not fully sure. Could you please clarify?"
 
-                if not context:
-                    return "I’m not fully sure. Could you please clarify?"
-
-                context_ids = self.tokenizer.encode(
-                    context,
-                    truncation=True,
-                    max_length=512
-                )
-                context = self.tokenizer.decode(
-                    context_ids,
-                    skip_special_tokens=True
-                )
+                context_ids = self.tokenizer.encode(context, truncation=True, max_length=512)
+                context = self.tokenizer.decode(context_ids, skip_special_tokens=True)
 
                 llm_input = {
-                    "system_prompt": inputs.get(
-                        "system_prompt",
-                        "You are a professional assistant."
-                    ),
+                    "system_prompt": inputs.get("system_prompt","You are a professional assistant."),
                     "context": context,
                     "query": query,
                     "intent": inputs.get("intent", "unknown"),
                     "emotion": inputs.get("emotion", "neutral"),
                     "urgency": inputs.get("urgency", "low"),
                     "complexity": inputs.get("complexity", "small"),
-                    "answer_size": inputs.get(
-                        "answer_size",
-                        "Provide a concise response."
-                    )
+                    "answer_size": inputs.get("answer_size","Provide a concise response.")
                 }
 
                 output = self.chain.invoke(llm_input)
 
                 if isinstance(output, str):
-                    text = output.split("Answer:")[-1]
-                    text = text.replace("</s>", "").replace("<|assistant|>", "").strip()
+                    text = output.split("Answer:")[-1].replace("</s>", "").replace("<|assistant|>", "").strip()
                     return text
 
                 return str(output)
-
             except Exception:
                 return "I’m not fully sure. Could you please clarify?"

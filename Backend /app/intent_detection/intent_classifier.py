@@ -125,7 +125,6 @@
 #                 result["confidence"] = 0.0
 
 #             return result
-
 import threading
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory
@@ -141,7 +140,6 @@ URGENT_KEYWORDS = {"now", "urgent", "asap", "immediately", "today", "tomorrow", 
 FRUSTRATION_KEYWORDS = {"angry", "frustrated", "annoyed", "ridiculous", "worst", "not working", "failed"}
 
 CONFIDENCE_THRESHOLD = 0.6
-
 
 class IntentClassifier:
     def __init__(self, model_name: str = "mistral"):
@@ -169,46 +167,19 @@ class IntentClassifier:
         result = {}
 
         if lowered in {"hi", "hello", "hey"}:
-            result = {
-                "intent": "greeting",
-                "emotion": "neutral",
-                "urgency": "low",
-                "complexity": "small",
-                "confidence": 0.95
-            }
-
+            result = {"intent": "greeting", "emotion": "neutral", "urgency": "low", "complexity": "small", "confidence": 0.95}
         elif lowered.startswith("who is"):
-            result = {
-                "intent": "identity_lookup",
-                "confidence": 0.9,
-                "complexity": "small"
-            }
-
+            result = {"intent": "identity_lookup", "confidence": 0.9, "complexity": "small"}
         elif any(w in lowered for w in {"service", "offer", "provide", "work", "do you"}):
-            result = {
-                "intent": "service_query",
-                "confidence": 0.85,
-                "complexity": "medium"
-            }
-
+            result = {"intent": "service_query", "confidence": 0.85, "complexity": "medium"}
         elif any(w in lowered for w in {"contact", "email", "call"}):
-            result = {
-                "intent": "contact_request",
-                "confidence": 0.85,
-                "complexity": "small"
-            }
-
+            result = {"intent": "contact_request", "confidence": 0.85, "complexity": "small"}
         elif any(w in lowered for w in {"order", "refund", "cancel", "track"}):
-            result = {
-                "intent": "transactional",
-                "confidence": 0.85,
-                "complexity": "medium"
-            }
+            result = {"intent": "transactional", "confidence": 0.85, "complexity": "medium"}
 
         if any(w in lowered for w in FRUSTRATION_KEYWORDS):
             result["emotion"] = "frustrated"
             result["urgency"] = "high"
-
         if any(w in lowered for w in URGENT_KEYWORDS):
             result["urgency"] = "high"
 
@@ -230,15 +201,7 @@ class IntentClassifier:
 
     def classify(self, message: str) -> Dict[str, Any]:
         with self._lock:
-            result = {
-                "intent": "unknown",
-                "emotion": "neutral",
-                "urgency": "low",
-                "complexity": "small",
-                "language": "unknown",
-                "sentiment_score": 0.0,
-                "confidence": 0.0
-            }
+            result = {"intent": "unknown", "emotion": "neutral", "urgency": "low", "complexity": "small", "language": "unknown", "sentiment_score": 0.0, "confidence": 0.0}
 
             if not message or not message.strip():
                 return result
@@ -257,7 +220,6 @@ class IntentClassifier:
 
             if result.get("confidence", 0.0) < CONFIDENCE_THRESHOLD:
                 result["intent"] = "unknown"
-
             if result["intent"] not in INTENTS:
                 result["intent"] = "unknown"
             if result["emotion"] not in EMOTIONS:

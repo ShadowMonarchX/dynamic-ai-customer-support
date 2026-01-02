@@ -112,12 +112,10 @@
 #         with self._lock:
 #             return self.documents
 
-
 import os
 import threading
 from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_core.documents import Document
-
 
 class DataSource:
     def __init__(self, path: str, chunk_size: int = 300, chunk_overlap: int = 50):
@@ -131,24 +129,21 @@ class DataSource:
         with self._lock:
             if not os.path.exists(self.path):
                 raise RuntimeError(f"Path not found: {self.path}")
-
             if os.path.isfile(self.path):
                 if not self.path.endswith(".txt"):
                     raise RuntimeError("Only .txt files are supported")
                 loader = TextLoader(self.path, encoding="utf-8")
                 raw_docs = loader.load()
-
             elif os.path.isdir(self.path):
                 loader = DirectoryLoader(
                     self.path,
                     glob="**/*.txt",
                     loader_cls=TextLoader,
-                    loader_kwargs={"encoding": "utf-8"},
+                    loader_kwargs={"encoding": "utf-8"}
                 )
                 raw_docs = loader.load()
             else:
                 raise RuntimeError("Invalid path type")
-
             self.documents = self._split_documents(raw_docs)
 
     def _split_documents(self, docs):
@@ -161,7 +156,7 @@ class DataSource:
                 chunked_docs.append(
                     Document(
                         page_content=text[start:end],
-                        metadata=dict(doc.metadata),
+                        metadata=dict(doc.metadata or {})
                     )
                 )
                 start += self.chunk_size - self.chunk_overlap
