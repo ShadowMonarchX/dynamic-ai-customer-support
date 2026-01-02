@@ -111,6 +111,7 @@
 #         with self._lock:
 #             return self.documents
 
+
 import os
 import threading
 from langchain_community.document_loaders import TextLoader, DirectoryLoader

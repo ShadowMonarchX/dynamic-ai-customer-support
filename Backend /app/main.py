@@ -360,9 +360,11 @@ while True:
             logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
         else:
             logging.info("Jessica: %s\n", answer)
-
+        print("--------------------------------1")
         logging.info("issues : %s", validation["issues"])
         logging.info("confidence : %s\n", validation["confidence"])
 
     except Exception as e:
+        print(f"\nSystem Error: {e}")
+        print("\n--------------------------------\n")
         logging.error("System Error: %s", e)

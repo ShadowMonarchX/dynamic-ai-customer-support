@@ -124,12 +124,16 @@
 
 #             except Exception as e:
 #                 raise RuntimeError(f"Query embedding failed: {e}")
+
+
+
 import threading
 from typing import List, Union
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 import numpy as np
 import faiss
+
 
 class Embedded:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
@@ -159,8 +163,11 @@ class Embedded:
     def embed_documents(self, documents: List[Union[Document, str]]) -> np.ndarray:
         with self._lock:
             docs = [
-                doc if isinstance(doc, Document)
-                else Document(page_content=str(doc), metadata={})
+                (
+                    doc
+                    if isinstance(doc, Document)
+                    else Document(page_content=str(doc), metadata={})
+                )
                 for doc in documents
             ]
             texts = []
