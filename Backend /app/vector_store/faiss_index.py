@@ -124,9 +124,8 @@
 # # faiss_index.py manages semantic vector storage and similarity search, enabling accurate, meaning-based retrieval that powers reliable and hallucination-free customer support AI responses.
 
 
-
-# import numpy as np 
-# import faiss # Facebook AI Similarity Search 
+# import numpy as np
+# import faiss # Facebook AI Similarity Search
 # import threading
 # from typing import List, Dict, Any
 
@@ -269,6 +268,7 @@ intent_topic_map = {
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("FAISSIndex")
 
+
 class FAISSIndex:
     def __init__(
         self,
@@ -277,7 +277,7 @@ class FAISSIndex:
         metadata: List[Dict[str, Any]],
         hnsw_m: int = 32,
         ef_search: int = 64,
-        ef_construction: int = 200
+        ef_construction: int = 200,
     ):
         if embeddings is None or len(embeddings) == 0:
             raise ValueError("Embeddings cannot be empty")
@@ -295,14 +295,16 @@ class FAISSIndex:
         self.index.add(self.embeddings)
 
     def _is_identity_query(self, intent: str, query_text: str) -> bool:
-        return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
+        return intent in {"identity", "profile"} or query_text.lower().startswith(
+            "who is"
+        )
 
     def retrieve(
         self,
         query_vector: np.ndarray,
         intent: str,
         query_text: str = "",
-        max_chunks: int = None
+        max_chunks: int = None,
     ) -> Dict[str, Any]:
         top_k = INTENT_TOP_K.get(intent, 2)
         if max_chunks is not None:
@@ -313,7 +315,9 @@ class FAISSIndex:
             raise ValueError("Query embedding is empty")
         query_vector = np.atleast_2d(query_vector).astype("float32")
         if query_vector.shape[1] != self.index.d:
-            raise ValueError(f"Query vector dimension ({query_vector.shape[1]}) does not match index ({self.index.d})")
+            raise ValueError(
+                f"Query vector dimension ({query_vector.shape[1]}) does not match index ({self.index.d})"
+            )
         faiss.normalize_L2(query_vector)
         distances, indices = self.index.search(query_vector, top_k * 10)
         threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
@@ -338,5 +342,11 @@ class FAISSIndex:
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         selected_docs = [doc for _, doc in scored_docs[:top_k]]
         if not selected_docs:
-            logger.warning(f"Empty retrieval for intent: {intent}, query: '{query_text}'")
-        return {"docs": selected_docs, "count": len(selected_docs), "status": "success" if selected_docs else "empty"}
+            logger.warning(
+                f"Empty retrieval for intent: {intent}, query: '{query_text}'"
+            )
+        return {
+            "docs": selected_docs,
+            "count": len(selected_docs),
+            "status": "success" if selected_docs else "empty",
+        }

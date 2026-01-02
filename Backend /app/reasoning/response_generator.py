@@ -11,7 +11,7 @@
 #     def _determine_size_constraint(self, query: str, intent: str) -> str:
 #         """Sets strict word counts based on user input length and intent."""
 #         word_count = len(query.split())
-        
+
 #         if word_count <= 2 or intent == "greeting":
 #             return "REPLY ONLY WITH 3 TO 5 WORDS. BE EXTREMELY BRIEF."
 #         elif word_count < 10:
@@ -30,7 +30,7 @@
 #             try:
 #                 query = data.get("query", "")
 #                 context_text = data.get("context", "")
-                
+
 #                 # 1️⃣ Token size check
 #                 token_count = len(self.reasoner.tokenizer.encode(query))
 #                 if token_count > self.max_query_size:
@@ -76,10 +76,7 @@ from app.reasoning.llm_reasoner import LLMReasoner
 
 
 class ResponseGenerator:
-    def __init__(
-        self,
-        model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-    ):
+    def __init__(self, model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
         self._lock = threading.Lock()
         self.reasoner = LLMReasoner(model_name=model_name)
         self.max_query_tokens = 500
@@ -107,8 +104,7 @@ class ResponseGenerator:
                     return "Your question is too long. Please simplify it."
 
                 size_rule = self._determine_size_constraint(
-                    query,
-                    data.get("intent", "unknown")
+                    query, data.get("intent", "unknown")
                 )
 
                 system_prompt = (
@@ -125,8 +121,8 @@ class ResponseGenerator:
                     "intent": data.get("intent", "unknown"),
                     "emotion": data.get("emotion", "neutral"),
                     "urgency": data.get("urgency", "low"),
-                    "complexity": data.get("complexity", "small"),
-                    "answer_size": size_rule
+                    "complexity":data.get("complexity", "small"),
+                    "answer_size":size_rule,
                 }
 
                 answer = self.reasoner.invoke(llm_input)

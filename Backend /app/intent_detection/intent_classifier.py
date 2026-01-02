@@ -126,6 +126,7 @@
 
 #             return result
 
+
 import threading
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory
