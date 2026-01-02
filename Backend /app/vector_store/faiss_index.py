@@ -233,12 +233,10 @@
 #                 "count": len(selected_docs),
 #                 "status": "success" if selected_docs else "empty"
 #             }
-
 import numpy as np
 import faiss
-import threading
 from typing import List, Dict, Any
-
+import logging
 
 INTENT_TOP_K = {
     "greeting": 0,
@@ -262,6 +260,14 @@ INTENT_SIMILARITY_THRESHOLD = {
     "unknown": 0.5,
 }
 
+intent_topic_map = {
+    "order": {"order", "billing", "refund"},
+    "refund": {"order", "billing", "refund"},
+    "transactional": {"order", "billing", "refund"},
+}
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("FAISSIndex")
 
 class FAISSIndex:
     def __init__(
@@ -273,95 +279,64 @@ class FAISSIndex:
         ef_search: int = 64,
         ef_construction: int = 200
     ):
-        self._lock = threading.Lock()
-
         if embeddings is None or len(embeddings) == 0:
             raise ValueError("Embeddings cannot be empty")
-
-        embeddings = np.atleast_2d(embeddings).astype("float32")
-
         if len(embeddings) != len(documents) or len(embeddings) != len(metadata):
-            raise ValueError("Embeddings, documents, and metadata size mismatch")
-
+            raise ValueError("Embeddings, documents, and metadata length mismatch")
+        embeddings = np.atleast_2d(embeddings).astype("float32")
         faiss.normalize_L2(embeddings)
-
         self.embeddings = embeddings
         self.documents = documents
         self.metadata = metadata
-
         dim = embeddings.shape[1]
-
         self.index = faiss.IndexHNSWFlat(dim, hnsw_m, faiss.METRIC_INNER_PRODUCT)
         self.index.hnsw.efSearch = ef_search
         self.index.hnsw.efConstruction = ef_construction
-
-        with self._lock:
-            self.index.add(self.embeddings)
+        self.index.add(self.embeddings)
 
     def _is_identity_query(self, intent: str, query_text: str) -> bool:
         return intent in {"identity", "profile"} or query_text.lower().startswith("who is")
 
-    def retrieve(self,query_vector: np.ndarray,intent: str,query_text: str = "",max_chunks: int = None ) -> Dict[str, Any]:
-        # Use max_chunks if provided
+    def retrieve(
+        self,
+        query_vector: np.ndarray,
+        intent: str,
+        query_text: str = "",
+        max_chunks: int = None
+    ) -> Dict[str, Any]:
         top_k = INTENT_TOP_K.get(intent, 2)
         if max_chunks is not None:
             top_k = max_chunks
-
         if top_k == 0:
             return {"docs": [], "count": 0, "status": "skip"}
-
         if query_vector is None or len(query_vector) == 0:
             raise ValueError("Query embedding is empty")
-
         query_vector = np.atleast_2d(query_vector).astype("float32")
-
         if query_vector.shape[1] != self.index.d:
-            raise ValueError("Query vector dimension mismatch")
-
+            raise ValueError(f"Query vector dimension ({query_vector.shape[1]}) does not match index ({self.index.d})")
         faiss.normalize_L2(query_vector)
-
-        # Read-only search does NOT need lock
-        distances, indices = self.index.search(query_vector, top_k * 5)  # over-fetch for safety
-
+        distances, indices = self.index.search(query_vector, top_k * 10)
         threshold = INTENT_SIMILARITY_THRESHOLD.get(intent, 0.5)
         scored_docs = []
-
         for sim, idx in zip(distances[0], indices[0]):
             if idx < 0 or idx >= len(self.documents):
                 continue
-
             meta = self.metadata[idx] or {}
-
             if meta.get("status") == "deprecated":
                 continue
-
             if self._is_identity_query(intent, query_text):
-                if not meta.get("identity_rich", False) and meta.get("content_type") != "identity":
+                if meta.get("content_type") != "identity":
                     continue
-
-            # Intent-topic mapping instead of hard-coded
-            intent_topic_map = {
-                "order": {"order", "billing", "refund"},
-                "refund": {"order", "billing", "refund"},
-                "transactional": {"order", "billing", "refund"},
-            }
             allowed_topics = intent_topic_map.get(intent, None)
             if allowed_topics and meta.get("topic", "general") not in allowed_topics:
                 continue
-
             if sim < threshold:
                 continue
-
             weight = float(meta.get("confidence_weight", 1.0))
             weight = max(0.1, min(weight, 2.0))
-
             scored_docs.append((sim * weight, self.documents[idx]))
-
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         selected_docs = [doc for _, doc in scored_docs[:top_k]]
-
-        return {
-            "docs": selected_docs,
-            "count": len(selected_docs),
-            "status": "success" if selected_docs else "empty"
-        }
+        if not selected_docs:
+            logger.warning(f"Empty retrieval for intent: {intent}, query: '{query_text}'")
+        return {"docs": selected_docs, "count": len(selected_docs), "status": "success" if selected_docs else "empty"}

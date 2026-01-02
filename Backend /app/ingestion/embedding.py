@@ -124,12 +124,12 @@
 
 #             except Exception as e:
 #                 raise RuntimeError(f"Query embedding failed: {e}")
-
 import threading
 from typing import List, Union
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
-import torch
+import numpy as np
+import faiss
 
 class Embedded:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
@@ -156,7 +156,7 @@ class Embedded:
             return 1.05
         return 1.0
 
-    def embed_documents(self, documents: List[Union[Document, str]]) -> List[List[float]]:
+    def embed_documents(self, documents: List[Union[Document, str]]) -> np.ndarray:
         with self._lock:
             docs = [
                 doc if isinstance(doc, Document)
@@ -170,13 +170,19 @@ class Embedded:
                 metadata["confidence_weight"] = self._confidence_weight(metadata)
                 doc.metadata = metadata
                 texts.append(text)
-            return self.embedding_model.embed_documents(texts)
+            embeddings = self.embedding_model.embed_documents(texts)
+            embeddings = np.atleast_2d(np.array(embeddings, dtype=np.float32))
+            faiss.normalize_L2(embeddings)
+            return embeddings
 
-    def embed_query(self, query: str) -> List[float]:
+    def embed_query(self, query: str) -> np.ndarray:
         with self._lock:
             q = query.strip()
             if not q:
                 raise RuntimeError("Empty query")
             if q.lower().startswith("who is"):
                 q = f"Person Profile Query: {q}"
-            return self.embedding_model.embed_query(q)
+            embedding = self.embedding_model.embed_query(q)
+            embedding = np.atleast_2d(np.array(embedding, dtype=np.float32))
+            faiss.normalize_L2(embedding)
+            return embedding

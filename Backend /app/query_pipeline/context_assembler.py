@@ -11,13 +11,15 @@
 #
 # This step ensures answer reliability.
 
-
 import threading
 from typing import List, Dict, Any
-from langchain_core.documents import Document # type: ignore
-from langchain_core.prompts import ChatPromptTemplate # type: ignore
-from langchain_core.messages import SystemMessage, HumanMessage # type: ignore
+from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage, HumanMessage
+import logging
 
+logger = logging.getLogger("ContextAssembler")
+logging.basicConfig(level=logging.INFO)
 
 class ContextAssembler:
     def __init__(self):
@@ -65,12 +67,12 @@ class ContextAssembler:
             context_text = "\n\n---\n\n".join(context_parts)
 
             instruction = self.base_instruction
-
             if query_features.get("emotion") == "angry":
                 instruction += "\nRespond with empathy, but remain factual."
-
             if query_features.get("urgency") == "high":
                 instruction += "\nKeep the answer short and action-oriented."
+
+            logger.info(f"Chunks sent to LLM: {len(context_parts)}")
 
             messages = [
                 SystemMessage(

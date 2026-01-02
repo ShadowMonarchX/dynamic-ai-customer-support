@@ -108,7 +108,6 @@
 #             "answer": answer,
 #             "status": "fallback"
 #         }
-
 import threading
 import logging
 from typing import Dict, Any
@@ -125,7 +124,6 @@ INTENT_RULES = {
     "big_issue": {"min_len": 40, "max_len": 250},
     "unknown": {"min_len": 10, "max_len": 120},
 }
-
 
 class AnswerValidator(Runnable):
     def __init__(self):

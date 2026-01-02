@@ -130,7 +130,9 @@ class LLMReasoner:
                 dtype = torch.float32
 
             self.tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-            self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=dtype, low_cpu_mem_usage=True)
+            self.model = AutoModelForCausalLM.from_pretrained(
+                model_name, torch_dtype=dtype, low_cpu_mem_usage=True
+            )
 
             hf_pipeline = pipeline(
                 "text-generation",
@@ -180,7 +182,6 @@ class LLMReasoner:
                 }
 
                 output = self.chain.invoke(llm_input)
-
                 if isinstance(output, str):
                     text = output.split("Answer:")[-1].replace("</s>", "").replace("<|assistant|>", "").strip()
                     return text

@@ -125,12 +125,14 @@
 #                 result["confidence"] = 0.0
 
 #             return result
+
 import threading
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_ollama import OllamaLLM
+import logging
 
 DetectorFactory.seed = 0
 
@@ -138,8 +140,10 @@ INTENTS = {"greeting", "identity_lookup", "service_query", "contact_request", "t
 EMOTIONS = {"neutral", "frustrated", "angry", "urgent", "stressed"}
 URGENT_KEYWORDS = {"now", "urgent", "asap", "immediately", "today", "tomorrow", "right away"}
 FRUSTRATION_KEYWORDS = {"angry", "frustrated", "annoyed", "ridiculous", "worst", "not working", "failed"}
-
 CONFIDENCE_THRESHOLD = 0.6
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("IntentClassifier")
 
 class IntentClassifier:
     def __init__(self, model_name: str = "mistral"):
@@ -201,7 +205,8 @@ class IntentClassifier:
 
     def classify(self, message: str) -> Dict[str, Any]:
         with self._lock:
-            result = {"intent": "unknown", "emotion": "neutral", "urgency": "low", "complexity": "small", "language": "unknown", "sentiment_score": 0.0, "confidence": 0.0}
+            result = {"intent": "unknown", "emotion": "neutral", "urgency": "low", "complexity": "small",
+                      "language": "unknown", "sentiment_score": 0.0, "confidence": 0.0}
 
             if not message or not message.strip():
                 return result
@@ -229,4 +234,5 @@ class IntentClassifier:
             if result["complexity"] not in {"small", "medium", "big"}:
                 result["complexity"] = "small"
 
+            logger.info(f"Detected intent: {result['intent']}, confidence: {result['confidence']}")
             return result

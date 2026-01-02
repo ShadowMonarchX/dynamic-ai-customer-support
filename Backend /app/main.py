@@ -238,24 +238,31 @@
 #     except Exception as e:
 #         print(f"\nSystem Error: {e}")
 
-
 import os
 import uuid
 import logging
 import numpy as np
+
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedded
+
 from app.vector_store.faiss_index import FAISSIndex
+
 from app.query_pipeline.query_preprocess import QueryPreprocessor
 from app.query_pipeline.human_features import HumanFeatureExtractor
+
 from app.intent_detection.intent_classifier import IntentClassifier
 from app.intent_detection.intent_features import IntentFeaturesExtractor
+
 from app.reasoning.response_generator import ResponseGenerator
+
 from app.validation.answer_validator import AnswerValidator
+
 from app.response_strategy.response_router import ResponseStrategyRouter
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
 
 data_path = '/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt'
 
@@ -317,6 +324,10 @@ while True:
             query_text=query_data["clean_text"],
             max_chunks=5
         )
+
+        if not retrieval.get("docs"):
+            logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
+            continue
 
         context_text = "\n\n".join(retrieval.get("docs", []))
         answer = generator.generate({
