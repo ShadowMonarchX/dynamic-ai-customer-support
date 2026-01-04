@@ -1,12 +1,13 @@
 import threading
 from typing import List, Dict, Any
-from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.documents import Document #type: ignore
+from langchain_core.prompts import ChatPromptTemplate #type: ignore
+from langchain_core.messages import SystemMessage, HumanMessage #type: ignore
 import logging
 
 logger = logging.getLogger("ContextAssembler")
 logging.basicConfig(level=logging.INFO)
+
 
 class ContextAssembler:
     def __init__(self):
@@ -23,7 +24,7 @@ class ContextAssembler:
         self,
         retrieved_docs: List[Document],
         query_features: Dict[str, Any],
-        max_chars: int = 2500
+        max_chars: int = 2500,
     ) -> ChatPromptTemplate:
         with self._lock:
             if not retrieved_docs:
@@ -35,7 +36,7 @@ class ContextAssembler:
                             "Politely ask the user to clarify their question."
                         )
                     ),
-                    HumanMessage(content="{question}")
+                    HumanMessage(content="{question}"),
                 ]
                 return ChatPromptTemplate.from_messages(messages)
 
@@ -65,7 +66,7 @@ class ContextAssembler:
                 SystemMessage(
                     content=f"{instruction}\n\nKNOWLEDGE BASE:\n{context_text}"
                 ),
-                HumanMessage(content="{question}")
+                HumanMessage(content="{question}"),
             ]
 
             return ChatPromptTemplate.from_messages(messages)

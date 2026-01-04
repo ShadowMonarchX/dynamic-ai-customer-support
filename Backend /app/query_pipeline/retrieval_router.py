@@ -1,8 +1,8 @@
 import threading
-import numpy as np
-from langchain_core.documents import Document
-from app.data_ingestion.embedding import Embedder as Embedded
-from app.vector_store.faiss_index import FAISSIndex
+import numpy as np #type: ignore
+from langchain_core.documents import Document #type: ignore
+from app.data_ingestion.embedding import Embedder as Embedded #type: ignore
+from app.vector_store.faiss_index import FAISSIndex #type: ignore
 
 class RetrievalRouter:
     def __init__(self, embedder: Embedded, vector_store: FAISSIndex):

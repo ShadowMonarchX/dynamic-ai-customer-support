@@ -2,8 +2,8 @@ import re
 import threading
 import logging
 from typing import Dict, Any
-from langdetect import detect, DetectorFactory
-import spacy
+from langdetect import detect, DetectorFactory #type: ignore
+import spacy #type: ignore
 
 DetectorFactory.seed = 0
 logger = logging.getLogger(__name__)

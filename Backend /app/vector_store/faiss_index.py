@@ -235,8 +235,8 @@
 
 
 
-import numpy as np
-import faiss
+import numpy as np #type: ignore
+import faiss #type: ignore
 from typing import List, Dict, Any
 import logging
 

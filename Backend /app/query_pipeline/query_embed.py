@@ -1,6 +1,6 @@
 class QueryEmbedder:
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        self._lock = threading.Lock()
+        self._lock = threading.Lock() #
         self.embedding_model = HuggingFaceEmbeddings(model_name=model_name)
 
     def embed_documents(self, documents):

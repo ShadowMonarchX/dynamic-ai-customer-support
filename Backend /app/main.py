@@ -1,7 +1,7 @@
 import os
 import uuid
 import logging
-import numpy as np
+import numpy as np #type: ignore
 
 from app.data_ingestion.data_load import DataSource
 from app.data_ingestion.preprocessing import Preprocessor
@@ -13,6 +13,9 @@ from app.vector_store.faiss_index import FAISSIndex
 
 from app.query_pipeline.query_preprocess import QueryPreprocessor
 from app.query_pipeline.human_features import HumanFeatureExtractor
+from app.query_pipeline.query_embed import QueryEmbedder
+from app.query_pipeline.context_assembler import ContextAssembler
+from app.query_pipeline.retrieval_router import RetrievalRouter
 
 from app.intent_detection.intent_classifier import IntentClassifier
 from app.intent_detection.intent_features import IntentFeaturesExtractor
