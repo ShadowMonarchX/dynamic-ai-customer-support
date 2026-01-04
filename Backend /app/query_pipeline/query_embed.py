@@ -1,3 +1,10 @@
+import threading
+import numpy as np #type: ignore
+from langchain_core.documents import Document #type: ignore
+from langchain_huggingface import HuggingFaceEmbeddings #type: ignore
+
+
+
 class QueryEmbedder:
     def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
         self._lock = threading.Lock() #

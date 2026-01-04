@@ -67,8 +67,20 @@ def initialize_system():
     index = FAISSIndex(vectors, chunks, metadata)
     return index, embedder
 
+
 faiss_index, embedder = initialize_system()
+
+print("\nFAISS Index and Embedder initialized successfully.\n")
 query_processor = QueryPreprocessor()
+human_features = HumanFeatureExtractor()
+query_embedder = QueryEmbedder(embedder)
+context_assembler = ContextAssembler()
+retriever = RetrievalRouter(embedder, faiss_index)
+intent_classifier = IntentClassifier()
+intent_features = IntentFeaturesExtractor()
+
+print("All components initialized successfully.\n")
+
 intent_classifier = IntentClassifier(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
 intent_feature_extractor = IntentFeaturesExtractor()
 generator = ResponseGenerator()
