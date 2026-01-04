@@ -6,6 +6,8 @@ import numpy as np
 from app.ingestion.data_load import DataSource
 from app.ingestion.preprocessing import Preprocessor
 from app.ingestion.embedding import Embedder
+from app.ingestion.metadata_enricher import MetadataEnricher
+from app.ingestion.ingestion_manager import IngestionManager
 
 from app.vector_store.faiss_index import FAISSIndex
 
@@ -92,7 +94,7 @@ while True:
         )
 
         print("retrieval :", retrieval)
-        
+
         if not retrieval.get("docs"):
             print("Hello - 1")
             logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
