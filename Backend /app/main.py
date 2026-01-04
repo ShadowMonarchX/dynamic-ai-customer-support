@@ -3,11 +3,11 @@ import uuid
 import logging
 import numpy as np
 
-from app.ingestion.data_load import DataSource
-from app.ingestion.preprocessing import Preprocessor
-from app.ingestion.embedding import Embedder
-from app.ingestion.metadata_enricher import MetadataEnricher
-from app.ingestion.ingestion_manager import IngestionManager
+from app.data_ingestion.data_load import DataSource
+from app.data_ingestion.preprocessing import Preprocessor
+from app.data_ingestion.embedding import Embedder
+from app.data_ingestion.metadata_enricher import MetadataEnricher
+from app.data_ingestion.ingestion_manager import IngestionManager
 
 from app.vector_store.faiss_index import FAISSIndex
 
