@@ -71,13 +71,12 @@ def initialize_system():
 faiss_index, embedder = initialize_system()
 
 print("\nFAISS Index and Embedder initialized successfully.\n")
+
 query_processor = QueryPreprocessor()
 human_features = HumanFeatureExtractor()
 query_embedder = QueryEmbedder(embedder)
 context_assembler = ContextAssembler()
 retriever = RetrievalRouter(embedder, faiss_index)
-intent_classifier = IntentClassifier()
-intent_features = IntentFeaturesExtractor()
 
 print("All components initialized successfully.\n")
 

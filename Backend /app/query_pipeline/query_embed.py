@@ -1,35 +1,26 @@
 import threading
 import numpy as np #type: ignore
 from langchain_core.documents import Document #type: ignore
-from langchain_huggingface import HuggingFaceEmbeddings #type: ignore
-
 
 
 class QueryEmbedder:
-    def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        self._lock = threading.Lock() #
-        self.embedding_model = HuggingFaceEmbeddings(model_name=model_name)
+    def __init__(self, embedder):
+        self._lock = threading.Lock()
+        self.embedder = embedder
 
     def embed_documents(self, documents):
         with self._lock:
-            # convert to Document objects if needed
             docs = [
-                (
-                    d
-                    if isinstance(d, Document)
-                    else Document(page_content=str(d), metadata={})
-                )
+                d if isinstance(d, Document)
+                else Document(page_content=str(d), metadata={})
                 for d in documents
             ]
-            texts, metas = [], []
-            for doc in docs:
-                meta = dict(doc.metadata or {})
-                texts.append(self._apply_bias(doc.page_content, meta))
-                meta["confidence_weight"] = self._confidence_weight(meta)
-                doc.metadata = meta
-                metas.append(meta)
-            embeddings = np.atleast_2d(
-                np.array(self.embedding_model.embed_documents(texts), dtype=np.float32)
-            )
-            faiss.normalize_L2(embeddings)
+            embeddings = self.embedder.embed_documents(docs)
             return embeddings
+
+    def embed_query(self, query: str):
+        with self._lock:
+            if not query or not query.strip():
+                raise RuntimeError("Empty query")
+            embedding = self.embedder.embed_query(query)
+            return np.atleast_2d(np.array(embedding, dtype="float32"))
