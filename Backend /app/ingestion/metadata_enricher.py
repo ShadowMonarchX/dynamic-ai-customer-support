@@ -76,8 +76,14 @@ import threading
 from typing import List, Dict, Any
 from langchain_core.documents import Document
 
+
 class MetadataEnricher:
-    def __init__(self, default_source: str = "docs", default_access: str = "public", default_version: str = "v1"):
+    def __init__(
+        self,
+        default_source: str = "docs",
+        default_access: str = "public",
+        default_version: str = "v1",
+    ):
         self._lock = threading.Lock()
         self.default_source = default_source
         self.default_access = default_access
@@ -99,4 +105,10 @@ class MetadataEnricher:
 
     def enrich_documents(self, documents: List[Document]) -> List[Document]:
         with self._lock:
-            return [Document(page_content=doc.page_content, metadata=self._enrich_metadata(doc.metadata)) for doc in documents]
+            return [
+                Document(
+                    page_content=doc.page_content,
+                    metadata=self._enrich_metadata(doc.metadata),
+                )
+                for doc in documents
+            ]
