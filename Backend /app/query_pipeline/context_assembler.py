@@ -1,16 +1,3 @@
-# context_assembler.py
-# (Context Selection & Validation Layer)
-# Purpose
-#
-# Selects the most accurate sections from retrieved documents,
-# removes duplicates, resolves conflicts, and ensures policy consistency.
-#
-# If data is missing:
-# - Provides a safe fallback response
-# - Or asks a clarifying question instead of guessing
-#
-# This step ensures answer reliability.
-
 import threading
 from typing import List, Dict, Any
 from langchain_core.documents import Document

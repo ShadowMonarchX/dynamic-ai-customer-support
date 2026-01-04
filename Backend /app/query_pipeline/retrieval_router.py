@@ -1,22 +1,7 @@
-# retrieval_router.py
-# (Intelligent Retrieval Layer)
-# Purpose
-#
-# Search and retrieve the most relevant internal documents based on query embeddings.
-#
-# What Happens Here
-#
-# Retrieves multiple relevant documents
-# Ranks them by semantic relevance
-# Filters outdated or irrelevant information
-#
-# This step is critical for hallucination prevention.
-
-
 import threading
 import numpy as np
 from langchain_core.documents import Document
-from .query_embed import Embedded
+from app.data_ingestion.embedding import Embedder as Embedded
 from app.vector_store.faiss_index import FAISSIndex
 
 class RetrievalRouter:
