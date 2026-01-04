@@ -1,10 +1,10 @@
 import threading
 from typing import List, Tuple
 from langchain_core.documents import Document
-
 from .preprocessing import Preprocessor
 from .embedding import Embedder
 from .metadata_enricher import MetadataEnricher
+import numpy as np
 
 
 class IngestionManager:
@@ -21,7 +21,7 @@ class IngestionManager:
 
     def ingest_documents(
         self, raw_documents: List[Document]
-    ) -> Tuple[List[Document], List[List[float]]]:
+    ) -> Tuple[List[Document], List[np.ndarray]]:
         with self._lock:
             processed_docs = []
             for doc in raw_documents:
@@ -34,16 +34,13 @@ class IngestionManager:
                     continue
             if not processed_docs:
                 raise RuntimeError("No valid documents to ingest")
-            embeddings = []
-            for doc in processed_docs:
-                try:
-                    vec = self.embedder.embed_documents([doc])
-                    if vec:
-                        embeddings.extend(vec)
-                except Exception:
-                    continue
-            if not embeddings:
-                raise RuntimeError("Embedding generation failed")
+            try:
+                embeddings_array = self.embedder.embed_documents(processed_docs)
+                if embeddings_array is None or embeddings_array.size == 0:
+                    raise RuntimeError("Embedding generation failed")
+                embeddings = [vec for vec in embeddings_array]
+            except Exception as e:
+                raise RuntimeError(f"Embedding generation failed: {e}")
             return processed_docs, embeddings
 
     def refresh_documents(self, raw_documents: List[Document]):
