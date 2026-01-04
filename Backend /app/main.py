@@ -28,24 +28,41 @@ logging.basicConfig(
 )
 
 
-data_path = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt"
-
+DATA_PATH = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt"
 
 def initialize_system():
-    if not os.path.exists(data_path):
-        raise FileNotFoundError(f"Missing knowledge base: {data_path}")
-    source = DataSource(data_path)
-    source.load_data()
-    processor = Preprocessor()
-    processed_docs = processor.transform_documents(source.get_documents())
-    embedder = Embedded(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    vectors = embedder.embed_documents(processed_docs)
-    vectors = np.atleast_2d(np.array(vectors, dtype="float32"))
+    try:
+        source = DataSource(DATA_PATH)
+        raw_documents = source.load()
+        print("\n--- Initializing AI Support System ---")
+        print(f"\nLoaded {len(raw_documents)} raw document(s) from: {DATA_PATH}\n")
+        print("--- Preprocessing Documents ---")
+    except FileNotFoundError as e:
+        print(f"Error loading data: {e}")
+        return
+
+    preprocessor = Preprocessor(chunk_size=900, chunk_overlap=200)
+    embedder = Embedder(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    enricher = MetadataEnricher(default_source="training_data")
+
+    ingestion_manager = IngestionManager(
+        preprocessor=preprocessor,
+        embedder=embedder,
+        metadata_enricher=enricher
+    )
+
+    try:
+        processed_docs, embeddings = ingestion_manager.ingest_documents(raw_documents)
+    except RuntimeError as e:
+        print(f"Ingestion failed: {e}")
+        return
+
+    vectors = np.atleast_2d(np.array(embeddings, dtype="float32"))
     metadata = [doc.metadata for doc in processed_docs]
     chunks = [doc.page_content for doc in processed_docs]
+
     index = FAISSIndex(vectors, chunks, metadata)
     return index, embedder
-
 
 faiss_index, embedder = initialize_system()
 query_processor = QueryPreprocessor()
