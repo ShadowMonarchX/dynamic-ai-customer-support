@@ -5,13 +5,21 @@ Handles all data ingestion and preprocessing tasks.
 Exports:
 - DataSource
 - Preprocessor
-- Embedded
+- Embedder
+- MetadataEnricher
+- IngestionManager
 """
 
 from .data_load import DataSource
 from .preprocessing import Preprocessor
-from .embedding import  Embedded
+from .embedding import Embedder
 from .metadata_enricher import MetadataEnricher
 from .ingestion_manager import IngestionManager
 
-__all__ = ["DataSource", "Preprocessor", "Embedded", "MetadataEnricher", "IngestionManager" ]
+__all__ = [
+    "DataSource",
+    "Preprocessor",
+    "Embedder",
+    "MetadataEnricher",
+    "IngestionManager",
+]

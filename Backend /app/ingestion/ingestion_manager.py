@@ -67,7 +67,7 @@ import threading
 from typing import List, Tuple
 from langchain_core.documents import Document
 from .preprocessing import Preprocessor
-from .embedding import Embedded
+from .embedding import Embedder
 from .metadata_enricher import MetadataEnricher
 
 
@@ -75,7 +75,7 @@ class IngestionManager:
     def __init__(
         self,
         preprocessor: Preprocessor,
-        embedder: Embedded,
+        embedder: Embedder,
         metadata_enricher: MetadataEnricher = None,
     ):
         self._lock = threading.Lock()

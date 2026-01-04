@@ -191,32 +191,3 @@ class Embedder:
             faiss.normalize_L2(vec)
             return vec
 
-
-from .data_load import DataSource
-from .preprocessing import Preprocessor
-
-DATA_PATH = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/new_training_data.txt"
-
-
-data_source = DataSource(DATA_PATH)
-documents = data_source.load()
-print(f"\nLoaded {len(documents)} raw documents\n")
-
-# 2. Preprocess (CLEAN + CHUNK)
-preprocessor = Preprocessor()
-processed_docs = preprocessor.transform_documents(documents)
-
-print(f"Processed into {len(processed_docs)} cleaned chunks\n")
-
-# ✅ PRINT ALL CLEAN TEXT (YOU ASKED THIS)
-print("\n========== CLEANED TEXT OUTPUT ==========\n")
-
-for idx, doc in enumerate(processed_docs, start=1):
-    print(f"----- Chunk {idx} -----")
-    print(doc.page_content)
-    print(f"Metadata: {doc.metadata}")
-    print()
-
-
-# for doc in processed_documents:
-#     print(doc)

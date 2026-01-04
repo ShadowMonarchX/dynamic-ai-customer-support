@@ -165,53 +165,31 @@
 #     def get_documents(self):
 #         with self._lock:
 #             return list(self.documents)
-
-
-import os
-import threading
+from pathlib import Path
 from typing import List
-
-from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain_core.documents import Document
 
-class DataSource:
-    """
-    Loads raw text documents from a file or directory.
-    This class MUST NOT clean, chunk, or modify content.
-    """
 
+class DataSource:
     def __init__(self, path: str):
-        self.path = path
-        self._lock = threading.Lock()
-        self.documents: List[Document] = []
+        self.path = Path(path)
+        self._documents: List[Document] = []
 
     def load(self) -> List[Document]:
-        """
-        Load raw documents into memory.
-        Thread-safe and idempotent.
-        """
-        with self._lock:
-            if self.documents:
-                return self.documents
+        if not self.path.exists():
+            raise FileNotFoundError(f"Data file not found: {self.path}")
 
-            if not os.path.exists(self.path):
-                raise FileNotFoundError(f"Data path not found: {self.path}")
+        text = self.path.read_text(encoding="utf-8", errors="ignore")
 
-            if os.path.isfile(self.path):
-                loader = TextLoader(self.path, encoding="utf-8")
-                self.documents = loader.load()
-
-            else:
-                loader = DirectoryLoader(
-                    self.path,
-                    glob="**/*.txt",
-                    loader_cls=TextLoader,
-                    loader_kwargs={"encoding": "utf-8"},
-                )
-                self.documents = loader.load()
-
-            # Attach source metadata explicitly
-            for doc in self.documents:
-                doc.metadata.setdefault("source", self.path)
-
-            return self.documents
+        self._documents = [
+            Document(
+                page_content=text,
+                metadata={
+                    "source": str(self.path),
+                    "category": "general",
+                    "urgency": "low",
+                    "content_type": "general",
+                },
+            )
+        ]
+        return self._documents
