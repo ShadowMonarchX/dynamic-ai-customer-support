@@ -106,7 +106,6 @@
 #             except Exception as e:
 #                 return f"Error in reasoning chain: {str(e)}"
 
-
 import torch
 import threading
 from typing import Dict, Any
@@ -122,10 +121,9 @@ class LLMReasoner:
         max_new_tokens: int = 256,
     ):
         self._lock = threading.Lock()
+        self.model_name = model_name
+        self.max_new_tokens = max_new_tokens
         try:
-            self.model_name = model_name
-            self.max_new_tokens = max_new_tokens
-
             if torch.backends.mps.is_available():
                 self.device = "mps"
                 dtype = torch.float16
@@ -171,38 +169,37 @@ class LLMReasoner:
                 ),
             )
             self.chain = self.prompt | self.llm
-
-        except Exception as e:
-            raise RuntimeError(f"LLM Initialization Failed: {e}")
+        except:
+            self.tokenizer = None
+            self.llm = None
+            self.chain = None
 
     def invoke(self, inputs: Dict[str, Any]) -> str:
         with self._lock:
+            query = inputs.get("query", "").strip()
+            context = inputs.get("context", "").strip()
+            if not query or not context or not self.chain:
+                return "I’m not fully sure. Could you please clarify?"
+
+            context_ids = self.tokenizer.encode(
+                context, truncation=True, max_length=512
+            )
+            context = self.tokenizer.decode(context_ids, skip_special_tokens=True)
+
+            llm_input = {
+                "system_prompt": inputs.get(
+                    "system_prompt", "You are a professional assistant."
+                ),
+                "context": context,
+                "query": query,
+                "intent": inputs.get("intent", "unknown"),
+                "emotion": inputs.get("emotion", "neutral"),
+                "urgency": inputs.get("urgency", "low"),
+                "complexity": inputs.get("complexity", "small"),
+                "answer_size": inputs.get("answer_size", "Provide a concise response."),
+            }
+
             try:
-                query = inputs.get("query", "").strip()
-                context = inputs.get("context", "").strip()
-                if not query or not context:
-                    return "I’m not fully sure. Could you please clarify?"
-
-                context_ids = self.tokenizer.encode(
-                    context, truncation=True, max_length=512
-                )
-                context = self.tokenizer.decode(context_ids, skip_special_tokens=True)
-
-                llm_input = {
-                    "system_prompt": inputs.get(
-                        "system_prompt", "You are a professional assistant."
-                    ),
-                    "context": context,
-                    "query": query,
-                    "intent": inputs.get("intent", "unknown"),
-                    "emotion": inputs.get("emotion", "neutral"),
-                    "urgency": inputs.get("urgency", "low"),
-                    "complexity": inputs.get("complexity", "small"),
-                    "answer_size": inputs.get(
-                        "answer_size", "Provide a concise response."
-                    ),
-                }
-
                 output = self.chain.invoke(llm_input)
                 if isinstance(output, str):
                     text = (
@@ -212,7 +209,6 @@ class LLMReasoner:
                         .strip()
                     )
                     return text
-
                 return str(output)
-            except Exception:
+            except:
                 return "I’m not fully sure. Could you please clarify?"
