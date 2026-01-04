@@ -1,52 +1,32 @@
-# retrieval_router.py
-# (Intelligent Retrieval Layer)
-# Purpose
-#
-# Search and retrieve the most relevant internal documents based on query embeddings.
-#
-# What Happens Here
-#
-# Retrieves multiple relevant documents
-# Ranks them by semantic relevance
-# Filters outdated or irrelevant information
-#
-# This step is critical for hallucination prevention.
 import threading
-import numpy as np
-from langchain_core.documents import Document
-from .query_embed import Embedded
+from typing import Dict, Any
+from app.query_pipeline.query_embed import QueryEmbedder
 from app.vector_store.faiss_index import FAISSIndex
 
+
 class RetrievalRouter:
-    def __init__(self, embedder: Embedded, vector_store: FAISSIndex):
-        self.embedder = embedder
+    def __init__(self, query_embedder: QueryEmbedder, vector_store: FAISSIndex):
+        self.query_embedder = query_embedder
         self.vector_store = vector_store
         self._lock = threading.Lock()
 
-    def retrieve(self, query: str, top_k: int = 5):
+    def retrieve(
+        self,
+        query: str,
+        intent: str = "unknown",
+        max_chunks: int | None = None,
+    ) -> Dict[str, Any]:
         with self._lock:
-            try:
-                if not query or not query.strip():
-                    return []
+            if not query or not query.strip():
+                return {"docs": [], "count": 0, "status": "empty"}
 
-                # Embed the query
-                query_embedding = self.embedder.embed_query(query)
-                query_vector = np.atleast_2d(np.array(query_embedding, dtype="float32"))
+            query_vector = self.query_embedder.embed_query(query)
 
-                import faiss
-                faiss.normalize_L2(query_vector)
+            retrieval = self.vector_store.retrieve(
+                query_vector=query_vector,
+                intent=intent,
+                query_text=query,
+                max_chunks=max_chunks,
+            )
 
-                # Retrieve from FAISS
-                retrieval = self.vector_store.retrieve(
-                    query_vector=query_vector,
-                    intent="unknown",
-                    query_text=query,
-                    max_chunks=top_k
-                )
-
-                # Convert to list of (Document, similarity)
-                results = [(Document(page_content=doc), 1.0) for doc in retrieval.get("docs", [])]
-                return results
-
-            except Exception as e:
-                raise RuntimeError(f"Retrieval Failed: {e}")
+            return retrieval
