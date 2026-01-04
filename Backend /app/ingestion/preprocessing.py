@@ -4,7 +4,6 @@ from typing import List, Dict
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import numpy as np
-import faiss
 
 
 class Preprocessor:

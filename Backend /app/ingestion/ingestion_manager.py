@@ -1,6 +1,7 @@
 import threading
 from typing import List, Tuple
 from langchain_core.documents import Document
+
 from .preprocessing import Preprocessor
 from .embedding import Embedder
 from .metadata_enricher import MetadataEnricher
