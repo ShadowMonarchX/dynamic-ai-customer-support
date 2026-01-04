@@ -26,7 +26,16 @@ from langdetect import detect, DetectorFactory  # type: ignore
 
 DetectorFactory.seed = 0
 
-FOLLOWUP_KEYWORDS = {"that", "it", "this", "those", "same", "continue", "what about", "and then"}
+FOLLOWUP_KEYWORDS = {
+    "that",
+    "it",
+    "this",
+    "those",
+    "same",
+    "continue",
+    "what about",
+    "and then",
+}
 
 # Context memory per session
 _SESSION_CONTEXT: Dict[str, Dict[str, Any]] = {}
@@ -38,13 +47,21 @@ class IntentFeaturesExtractor:
         self._lock = threading.Lock()
         self.max_decay = max_decay  # number of turns before context decays
 
-    def extract(self, query: str, previous_context: Dict[str, Any] | None = None, session_id: str | None = None) -> Dict[str, Any]:
+    def extract(
+        self,
+        query: str,
+        previous_context: Dict[str, Any] | None = None,
+        session_id: str | None = None,
+    ) -> Dict[str, Any]:
         with self._lock:
             if not query or not query.strip():
                 return self._default_response()
 
             lowered = query.lower()
-            is_followup = any(k in lowered for k in FOLLOWUP_KEYWORDS) or len(lowered.split()) <= 4
+            is_followup = (
+                any(k in lowered for k in FOLLOWUP_KEYWORDS)
+                or len(lowered.split()) <= 4
+            )
 
             try:
                 language = detect(query)
@@ -57,7 +74,14 @@ class IntentFeaturesExtractor:
 
             # --- Session context handling ---
             if session_id:
-                context = _SESSION_CONTEXT.get(session_id, {"turn_count": 0, "intent_topic": intent_topic, "question_type": question_type})
+                context = _SESSION_CONTEXT.get(
+                    session_id,
+                    {
+                        "turn_count": 0,
+                        "intent_topic": intent_topic,
+                        "question_type": question_type,
+                    },
+                )
 
                 # Follow-up chaining with topic locking
                 if is_followup:
@@ -75,18 +99,20 @@ class IntentFeaturesExtractor:
                     context["turn_count"] = 0  # reset decay
 
                 # Save back context
-                context.update({
-                    "intent_topic": intent_topic,
-                    "question_type": question_type,
-                    "follow_up": is_followup
-                })
+                context.update(
+                    {
+                        "intent_topic": intent_topic,
+                        "question_type": question_type,
+                        "follow_up": is_followup,
+                    }
+                )
                 _SESSION_CONTEXT[session_id] = context
 
             return {
                 "intent_topic": intent_topic,
                 "question_type": question_type,
                 "follow_up": is_followup,
-                "language": language
+                "language": language,
             }
 
     def _detect_topic(self, text: str) -> str:
@@ -118,5 +144,5 @@ class IntentFeaturesExtractor:
             "intent_topic": "general",
             "question_type": "general",
             "follow_up": False,
-            "language": "unknown"
+            "language": "unknown",
         }
