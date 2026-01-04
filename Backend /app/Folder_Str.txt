@@ -12,6 +12,7 @@ preprocessing.py (Cleans the text and tags headers)
 ingestion_manager.py
 metadata_enricher.py 
 embedding.py (Handles the transformation of chunks into vectors)
+run_preprocessing.py
 
 __init__.py
 
