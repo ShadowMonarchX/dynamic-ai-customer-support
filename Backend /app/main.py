@@ -36,7 +36,7 @@ def initialize_system():
         raw_documents = source.load()
         print("\n--- Initializing AI Support System ---")
         print(f"\nLoaded {len(raw_documents)} raw document(s) from: {DATA_PATH}\n")
-        print("--- Preprocessing Documents ---")
+        print("--- Preprocessing Documents ---\n")
     except FileNotFoundError as e:
         print(f"Error loading data: {e}")
         return
