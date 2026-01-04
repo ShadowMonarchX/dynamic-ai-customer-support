@@ -32,14 +32,14 @@ Nayan strongly believes in continuous learning and regularly explores new tools,
 
 PERSONAL INFORMATION
 --------------------
-Full Name: Nayan Raval
-Email Address: ravalnayan029@gmail.com
-Mobile Number: +91 9510117047
-Location: India
-Availability Status: Available for freelance, contract, and full-time opportunities
-Primary Field: Software Engineering & Web Development
-Preferred Work Type: Backend Development, API Development, System Design
-Remote Work: Yes
+Full Name : Nayan Raval
+Email Address : ravalnayan029@gmail.com
+Mobile Number : +91 9510117047
+Location : India
+Availability Status : Available for freelance, contract, and full-time opportunities
+Primary Field : Software Engineering & Web Development
+Preferred Work Type : Backend Development, API Development, System Design
+Remote Work : Yes
 
 ==================================================
 
