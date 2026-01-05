@@ -1,7 +1,7 @@
 import os
 import uuid
 import logging
-import numpy as np #type: ignore
+import numpy as np  # type: ignore
 
 from app.data_ingestion.data_load import DataSource
 from app.data_ingestion.preprocessing import Preprocessor
@@ -33,6 +33,7 @@ logging.basicConfig(
 
 DATA_PATH = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt"
 
+
 def initialize_system():
     source = DataSource(DATA_PATH)
     raw_documents = source.load()
@@ -56,17 +57,24 @@ def initialize_system():
     index = FAISSIndex(vectors, chunks, metadata)
     return index, embedder
 
+
+print("\nInitializing AI Support System...\n")
 faiss_index, embedder = initialize_system()
 
+print("\nInitialization Complete.\n")
 query_processor = QueryPreprocessor()
 query_embedder = QueryEmbedder(embedder)
 context_assembler = ContextAssembler()
-retriever = RetrievalRouter(embedder, faiss_index)
+retriever = RetrievalRouter(query_embedder, faiss_index)
 
+print("\nSystem Components Ready.\n")
 intent_classifier = IntentClassifier(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
 intent_feature_extractor = IntentFeaturesExtractor()
 
+print("\nIntent Detection Ready.\n")
 generator = ResponseGenerator()
+
+print("\nResponse Generator Ready.\n")
 validator = AnswerValidator()
 strategy_router = ResponseStrategyRouter()
 
@@ -76,7 +84,7 @@ logging.info("AI Support System Ready")
 
 while True:
     try:
-        user_input = input("Customer : ").strip()
+        user_input = input("\nCustomer : ").strip()
         if user_input.lower() in {"exit", "quit", "q"}:
             break
         if not user_input:

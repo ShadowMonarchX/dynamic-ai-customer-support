@@ -14,7 +14,7 @@ class RetrievalRouter:
         self,
         query: str,
         intent: str = "unknown",
-        max_chunks: int | None = None,
+        top_k: int = 5,
     ) -> Dict[str, Any]:
         with self._lock:
             if not query or not query.strip():
@@ -26,7 +26,7 @@ class RetrievalRouter:
                 query_vector=query_vector,
                 intent=intent,
                 query_text=query,
-                max_chunks=max_chunks,
+                top_k=top_k,
             )
 
             return retrieval

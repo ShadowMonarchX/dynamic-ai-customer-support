@@ -1,7 +1,7 @@
 import threading
-import numpy as np  # type: ignore
-import faiss  # type: ignore
-from langchain_core.documents import Document  # type: ignore
+import numpy as np
+import faiss
+from langchain_core.documents import Document
 
 
 class QueryEmbedder:
@@ -10,11 +10,8 @@ class QueryEmbedder:
         self.embedder = embedder
 
     def embed_documents(self, documents):
-        """
-        Used only if you ever re-embed chunks dynamically.
-        """
         with self._lock:
-            docs: list[Document] = []
+            docs = []
 
             for d in documents:
                 if isinstance(d, Document):
@@ -37,9 +34,6 @@ class QueryEmbedder:
             return vectors
 
     def embed_query(self, query: str) -> np.ndarray:
-        """
-        Main method used in retrieval pipeline.
-        """
         with self._lock:
             if not isinstance(query, str) or not query.strip():
                 raise RuntimeError("Empty query")

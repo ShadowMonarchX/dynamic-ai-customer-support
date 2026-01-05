@@ -1,9 +1,7 @@
-import numpy as np  # type: ignore
-import faiss  # type: ignore
+import numpy as np
+import faiss
 from typing import List, Dict, Any
 import logging
-
-# ---------- Intent configs ----------
 
 INTENT_TOP_K = {
     "greeting": 0,
@@ -38,8 +36,6 @@ INTENT_TOPIC_MAP = {
     "billing/refund": {"billing", "refund"},
     "transactional": {"order", "billing", "refund"},
 }
-
-# ---------- Logging ----------
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("FAISSIndex")
@@ -84,10 +80,10 @@ class FAISSIndex:
         query_vector: np.ndarray,
         intent: str,
         query_text: str = "",
-        max_chunks: int | None = None,
+        top_k: int = 2,
     ) -> Dict[str, Any]:
 
-        top_k = max_chunks or INTENT_TOP_K.get(intent, 2)
+        top_k = top_k or INTENT_TOP_K.get(intent, 2)
         if top_k == 0:
             return {"docs": [], "count": 0, "status": "skip"}
 
@@ -135,9 +131,6 @@ class FAISSIndex:
 
         scored_docs.sort(key=lambda x: x[0], reverse=True)
         selected_docs = [doc for _, doc in scored_docs[:top_k]]
-
-        if not selected_docs:
-            logger.warning(f"Empty retrieval | intent={intent} | query='{query_text}'")
 
         return {
             "docs": selected_docs,
