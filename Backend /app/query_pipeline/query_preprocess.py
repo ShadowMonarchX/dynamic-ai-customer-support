@@ -1,11 +1,8 @@
-import re
-import threading
-import logging
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory  # type: ignore
+import re
 
 DetectorFactory.seed = 0
-logger = logging.getLogger(__name__)
 
 # -------- spaCy safe load --------
 try:
@@ -14,7 +11,7 @@ try:
     nlp = spacy.load("en_core_web_sm")
 except Exception:
     nlp = None
-    logger.warning("spaCy model not loaded — NER disabled")
+    print("spaCy model not loaded — NER disabled")
 
 # -------- Keyword sets --------
 URGENT_KEYWORDS = {
@@ -40,7 +37,7 @@ FRUSTRATION_KEYWORDS = {
 QUESTION_WORDS = {"who", "what", "how", "why", "when", "where"}
 
 # -------- Small talk patterns --------
-SMALL_TALK_PATTERNS = [
+SMALL_TALK_KEYWORDS = [
     r"\bhi+\b",
     r"\bhello+\b",
     r"\bhey+\b",
@@ -53,26 +50,24 @@ SMALL_TALK_PATTERNS = [
     r"\bso what\b",
 ]
 
-COMPILED_SMALL_TALK = [re.compile(p, re.IGNORECASE) for p in SMALL_TALK_PATTERNS]
+COMPILED_SMALL_TALK = [re.compile(p, re.IGNORECASE) for p in SMALL_TALK_KEYWORDS]
 
 
 def is_small_talk(text: str) -> bool:
-    return any(p.search(text) for p in COMPILED_SMALL_TALK)
+    return any(pattern.search(text) for pattern in COMPILED_SMALL_TALK)
 
 
 class QueryPreprocessor:
     def __init__(self):
-        self._lock = threading.Lock()
-        self.clean_regex = re.compile(r"[^a-z0-9\s\?!]")
+        pass
 
     def invoke(self, query: str) -> Dict[str, Any]:
-        with self._lock:
+        try:
             if not isinstance(query, str) or not query.strip():
                 return self._default_response()
 
             lowered = query.lower().strip()
 
-            # ---- Small talk handling ----
             if is_small_talk(lowered):
                 return {
                     "clean_text": lowered,
@@ -80,16 +75,18 @@ class QueryPreprocessor:
                     "emotion": "neutral",
                     "sentiment_score": 0.0,
                     "language": "unknown",
-                    "intent": "greeting",  
+                    "intent": "greeting",
                     "named_entities": [],
                     "question_depth": 0,
                 }
 
-            clean_text = self.clean_regex.sub("", lowered).strip()
+            clean_text = "".join(
+                c for c in lowered if c.isalnum() or c.isspace() or c in {"?", "!"}
+            ).strip()
+
             if not clean_text:
                 return self._default_response()
 
-            # ---- NER ----
             named_entities = []
             if nlp:
                 named_entities = [ent.text for ent in nlp(query).ents]
@@ -97,7 +94,6 @@ class QueryPreprocessor:
             is_urgent = any(word in lowered for word in URGENT_KEYWORDS)
             is_frustrated = any(word in lowered for word in FRUSTRATION_KEYWORDS)
 
-            # ---- Language detection (skip for short text) ----
             if len(clean_text.split()) <= 2:
                 language = "unknown"
             else:
@@ -118,6 +114,8 @@ class QueryPreprocessor:
                 "named_entities": named_entities,
                 "question_depth": question_depth,
             }
+        except Exception:
+            return self._default_response()
 
     def _detect_basic_intent(self, text: str, entities: list) -> str:
         if "refund" in text or "money back" in text:
