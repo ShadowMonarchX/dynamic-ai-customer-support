@@ -1,8 +1,9 @@
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory  # type: ignore
+import re
 
 DetectorFactory.seed = 0
-import re
+
 # -------- spaCy safe load --------
 try:
     import spacy  # type: ignore
@@ -10,7 +11,7 @@ try:
     nlp = spacy.load("en_core_web_sm")
 except Exception:
     nlp = None
-    logger.warning("spaCy model not loaded — NER disabled")
+    print("spaCy model not loaded — NER disabled")
 
 # -------- Keyword sets --------
 URGENT_KEYWORDS = {
@@ -49,10 +50,11 @@ SMALL_TALK_KEYWORDS = [
     r"\bso what\b",
 ]
 
-COMPILED_SMALL_TALK = [re.compile(p, re.IGNORECASE) for p in SMALL_TALK_PATTERNS]
+COMPILED_SMALL_TALK = [re.compile(p, re.IGNORECASE) for p in SMALL_TALK_KEYWORDS]
+
 
 def is_small_talk(text: str) -> bool:
-    return any(k in text for k in SMALL_TALK_KEYWORDS)
+    return any(pattern.search(text) for pattern in COMPILED_SMALL_TALK)
 
 
 class QueryPreprocessor:

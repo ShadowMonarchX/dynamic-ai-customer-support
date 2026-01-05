@@ -82,11 +82,11 @@ try:
 
     SESSION_ID = str(uuid.uuid4())
 
-    print("AI Support System Ready\n")
+    print("\nAI Support System Ready\n")
 
     while True:
         try:
-            user_input = input("\nCustomer : ").strip()
+            user_input = input("\nCustomer  : ").strip()
             if user_input.lower() in {"exit", "quit", "q"}:
                 break
             if not user_input:
@@ -102,7 +102,7 @@ try:
             intent_data = intent_classifier.classify(query_data["clean_text"])
 
             if intent_data.get("intent") == "greeting":
-                print("Jessica: Hi! How can I help you today?\n")
+                print("Jessica  :  Hi! How can I help you today?\n")
                 continue
 
             intent_features = intent_feature_extractor.extract(
@@ -128,7 +128,7 @@ try:
             )
 
             if not retrieval:
-                print("Jessica: I’m not fully sure. Could you please clarify?\n")
+                print("Jessica  :  I’m not fully sure. Could you please clarify?\n")
                 continue
 
             context_text = context_assembler.assemble(
@@ -156,16 +156,31 @@ try:
                     "similarity": 1.0,
                 }
             )
-
+            print("\n")
+            print("validation", validation)
+            print("--------------------")
+            print("\n---- Validation Scores ----")
+            print("\nconfidence  : ", validation["confidence"])
+            print("relevance  : ", validation["relevance"])
+            print("clarity    : ", validation["clarity"])
+            print("consistency: ", validation["consistency"])
+            print("completeness: ", validation["completeness"])
+            print("final_score: ", validation["final_score"], "\n")
+            print("---- Debug Info ----")
+            print("Intent     : ", features.get("intent"))
+            print("Emotion    : ", features.get("emotion"))
+            print("Urgency    : ", features.get("urgency"))
+            print("Follow Up  : ", features.get("follow_up"))
+            print("--------------------\n")
             if validation["confidence"] < 0.5:
-                print("Jessica: I’m not fully sure. Could you please clarify?\n")
+                print("Jessica  : I’m not fully sure. Could you please clarify?\n")
             else:
-                print(f"Jessica: {answer}\n")
+                print(f"Jessica  : {answer}\n")
 
-            print(f"confidence : {validation['confidence']}")
+            print(f"confidence  : {validation['confidence']}")
 
         except Exception as e:
-            print(f"Runtime Error: {e}")
+            print(f"Runtime Error  : {e}")
 
 except Exception as e:
-    print(f"Fatal Error: {e}")
+    print(f"Fatal Error  : {e}")

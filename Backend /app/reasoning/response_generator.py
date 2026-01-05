@@ -19,21 +19,27 @@ class ResponseGenerator:
 
     def generate(self, data: Dict[str, Any]) -> str:
         with self._lock:
-            query = data.get("query", "").strip()
-            context = data.get("context", "").strip()
-            if not query or not context or not self.reasoner.tokenizer:
+            query = str(data.get("query", "")).strip()
+            context = str(data.get("context", "")).strip()
+            if (
+                not query
+                or not context
+                or not getattr(self.reasoner, "tokenizer", None)
+            ):
                 return "I’m not fully sure. Could you please clarify?"
 
-            token_count = len(self.reasoner.tokenizer.encode(query))
+            try:
+                token_count = len(self.reasoner.tokenizer.encode(query))
+            except Exception:
+                token_count = len(query.split())
             if token_count > self.max_query_tokens:
                 return "Your question is too long. Please simplify it."
 
             size_rule = self._determine_size_constraint(
-                query, data.get("intent", "unknown")
+                query, str(data.get("intent", "unknown"))
             )
-
             system_prompt = (
-                f"{data.get('system_prompt', '')} {size_rule} "
+                f"{str(data.get('system_prompt', ''))} {size_rule} "
                 "Answer strictly using the provided context. If the answer is missing, say you are not sure."
             )
 
@@ -41,15 +47,19 @@ class ResponseGenerator:
                 "query": query,
                 "context": context,
                 "system_prompt": system_prompt,
-                "intent": data.get("intent", "unknown"),
-                "emotion": data.get("emotion", "neutral"),
-                "urgency": data.get("urgency", "low"),
-                "complexity": data.get("complexity", "small"),
+                "intent": str(data.get("intent", "unknown")),
+                "emotion": str(data.get("emotion", "neutral")),
+                "urgency": str(data.get("urgency", "low")),
+                "complexity": str(data.get("complexity", "small")),
                 "answer_size": size_rule,
             }
 
-            answer = self.reasoner.invoke(llm_input)
-            if not answer or len(answer.split()) < 3:
+            try:
+                answer = self.reasoner.invoke(llm_input)
+            except Exception:
                 return "I’m not fully sure. Could you please clarify?"
 
-            return answer
+            if not answer or len(answer.split()) < 3:
+                return "I’m not fully sure. Could you please clarify()"
+
+            return str(answer).strip()

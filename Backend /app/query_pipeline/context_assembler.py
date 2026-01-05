@@ -1,7 +1,5 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage, HumanMessage
 
 
 class ContextAssembler:
@@ -16,21 +14,32 @@ class ContextAssembler:
 
     def assemble(
         self,
-        retrieval: Dict[str, Any],
-        intent: str,
+        retrieval: Union[Dict[str, Any], List[Any]],
+        intent: str = "",
         max_chars: int = 2500,
     ) -> str:
         try:
-            docs: List[Any] = retrieval.get("docs", [])
+            # Handle if retrieval is just a list of docs
+            if isinstance(retrieval, list):
+                docs: List[Any] = retrieval
+            elif isinstance(retrieval, dict):
+                docs: List[Any] = retrieval.get("docs", [])
+            else:
+                docs = []
 
             if not docs:
-                return ""
+                return f"{self.base_instruction}\n\nKNOWLEDGE BASE:\nNo relevant information available."
 
             context_parts = []
             current_length = 0
 
             for doc in docs:
-                text = doc.strip() if isinstance(doc, str) else str(doc).strip()
+                # Support Document objects
+                if isinstance(doc, Document):
+                    text = doc.page_content.strip()
+                else:
+                    text = str(doc).strip()
+
                 if not text:
                     continue
                 if current_length + len(text) > max_chars:
@@ -42,4 +51,4 @@ class ContextAssembler:
 
             return f"{self.base_instruction}\n\nKNOWLEDGE BASE:\n{context_text}"
         except Exception:
-            return ""
+            return f"{self.base_instruction}\n\nKNOWLEDGE BASE:\nNo relevant information available."
