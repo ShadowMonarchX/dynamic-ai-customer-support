@@ -18,7 +18,7 @@ INTENT_TOP_K = {
 }
 
 INTENT_SIMILARITY_THRESHOLD = {
-    "identity": 0.55,
+    "identity": 0.35,
     "faq": 0.55,
     "services": 0.55,
     "skills": 0.55,
@@ -93,7 +93,7 @@ class FAISSIndex:
             if meta.get("status") == "deprecated":
                 continue
             if self._is_identity_query(intent, query_text):
-                if meta.get("content_type", "") != "identity":
+                if "identity" not in meta.get("content_type", "general"):
                     continue
             allowed_topics = INTENT_TOPIC_MAP.get(intent)
             if allowed_topics and meta.get("topic", "general") not in allowed_topics:
