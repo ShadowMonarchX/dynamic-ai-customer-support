@@ -33,8 +33,6 @@ class RetrievalRouter:
             if "count" not in retrieval:
                 retrieval["count"] = len(retrieval.get("docs", []))
             if "status" not in retrieval:
-                retrieval["status"] = (
-                    "empty" if len(retrieval.get("docs", [])) == 0 else "success"
-                )
+                retrieval["status"] = "success" if retrieval["docs"] else "empty"
 
             return retrieval

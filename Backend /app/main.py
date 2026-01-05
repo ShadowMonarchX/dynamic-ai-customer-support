@@ -148,30 +148,40 @@ try:
                 }
             )
 
+            # validation = validator.invoke(
+            #     {
+            #         "answer": answer,
+            #         "intent": features.get("intent"),
+            #         "emotion": features.get("emotion"),
+            #         "similarity": 1.0,
+            #     }
+            # )
             validation = validator.invoke(
                 {
                     "answer": answer,
                     "intent": features.get("intent"),
                     "emotion": features.get("emotion"),
                     "similarity": 1.0,
+                    "context": context_text,  # Add this line
                 }
             )
-            print("\n")
-            print("validation", validation)
-            print("--------------------")
-            print("\n---- Validation Scores ----")
-            print("\nconfidence  : ", validation["confidence"])
-            print("relevance  : ", validation["relevance"])
-            print("clarity    : ", validation["clarity"])
-            print("consistency: ", validation["consistency"])
-            print("completeness: ", validation["completeness"])
-            print("final_score: ", validation["final_score"], "\n")
-            print("---- Debug Info ----")
-            print("Intent     : ", features.get("intent"))
-            print("Emotion    : ", features.get("emotion"))
-            print("Urgency    : ", features.get("urgency"))
-            print("Follow Up  : ", features.get("follow_up"))
-            print("--------------------\n")
+
+            # print("\n")
+            # print("validation", validation)
+            # print("--------------------")
+            # print("\n---- Validation Scores ----")
+            # print("\nconfidence  : ", validation["confidence"])
+            # print("relevance  : ", validation["relevance"])
+            # print("clarity    : ", validation["clarity"])
+            # print("consistency: ", validation["consistency"])
+            # print("completeness: ", validation["completeness"])
+            # print("final_score: ", validation["final_score"], "\n")
+            # print("---- Debug Info ----")
+            # print("Intent     : ", features.get("intent"))
+            # print("Emotion    : ", features.get("emotion"))
+            # print("Urgency    : ", features.get("urgency"))
+            # print("Follow Up  : ", features.get("follow_up"))
+            # print("--------------------\n")
             if validation["confidence"] < 0.5:
                 print("Jessica  : I’m not fully sure. Could you please clarify?\n")
             else:
