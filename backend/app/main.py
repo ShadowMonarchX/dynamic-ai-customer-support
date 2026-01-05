@@ -1,4 +1,3 @@
-
 import os
 import uuid
 import logging
@@ -30,7 +29,7 @@ from app.validation.answer_validator import AnswerValidator
 
 from app.response_strategy.response_router import ResponseStrategyRouter
 
-DATA_PATH = "/data/training_data.txt"
+DATA_PATH = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend/app/data/training_data.txt"
 
 app = FastAPI(title="AI Chatbot API")
 SESSION_ID = str(uuid.uuid4())
@@ -171,14 +170,15 @@ def query_chatbot(request: QueryRequest):
         )
 
         if validation["confidence"] < 0.5:
-            return {"response": "I’m not fully sure. Could you please clarify?", "confidence": validation["confidence"]}
+            return {
+                "response": "I’m not fully sure. Could you please clarify?",
+                "confidence": validation["confidence"],
+            }
         else:
-            return {"response": answer, "confidence": validation["confidence"]}
+            return {"response": answer}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
 
 
 # def initialize_system():
