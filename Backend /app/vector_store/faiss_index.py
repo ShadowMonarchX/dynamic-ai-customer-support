@@ -1,7 +1,6 @@
 import numpy as np
 import faiss
 from typing import List, Dict, Any
-import logging
 
 INTENT_TOP_K = {
     "greeting": 0,
@@ -37,9 +36,6 @@ INTENT_TOPIC_MAP = {
     "transactional": {"order", "billing", "refund"},
 }
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("FAISSIndex")
-
 
 class FAISSIndex:
     def __init__(
@@ -69,8 +65,6 @@ class FAISSIndex:
         self.index.hnsw.efSearch = ef_search
         self.index.hnsw.efConstruction = ef_construction
         self.index.add(self.embeddings)
-
-        logger.info(f"FAISS index initialized with {len(embeddings)} vectors")
 
     def _is_identity_query(self, intent: str, query_text: str) -> bool:
         return intent == "identity" or query_text.lower().startswith("who is")

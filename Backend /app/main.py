@@ -26,141 +26,146 @@ from app.validation.answer_validator import AnswerValidator
 
 from app.response_strategy.response_router import ResponseStrategyRouter
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
+# logging.basicConfig(
+#     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+# )
 
 
 DATA_PATH = "/Users/jenishshekhada/Desktop/Inten/dynamic-ai-customer-support/backend /data/training_data.txt"
 
 
 def initialize_system():
-    source = DataSource(DATA_PATH)
-    raw_documents = source.load()
-
-    preprocessor = Preprocessor(chunk_size=900, chunk_overlap=200)
-    embedder = Embedder(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    enricher = MetadataEnricher(default_source="training_data")
-
-    ingestion_manager = IngestionManager(
-        preprocessor=preprocessor,
-        embedder=embedder,
-        metadata_enricher=enricher,
-    )
-
-    processed_docs, embeddings = ingestion_manager.ingest_documents(raw_documents)
-
-    vectors = np.atleast_2d(np.array(embeddings, dtype="float32"))
-    metadata = [doc.metadata for doc in processed_docs]
-    chunks = [doc.page_content for doc in processed_docs]
-
-    index = FAISSIndex(vectors, chunks, metadata)
-    return index, embedder
-
-
-print("\nInitializing AI Support System...\n")
-faiss_index, embedder = initialize_system()
-
-print("\nInitialization Complete.\n")
-query_processor = QueryPreprocessor()
-query_embedder = QueryEmbedder(embedder)
-context_assembler = ContextAssembler()
-retriever = RetrievalRouter(query_embedder, faiss_index)
-
-print("\nSystem Components Ready.\n")
-intent_classifier = IntentClassifier(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-intent_feature_extractor = IntentFeaturesExtractor()
-
-print("\nIntent Detection Ready.\n")
-generator = ResponseGenerator()
-
-print("\nResponse Generator Ready.\n")
-validator = AnswerValidator()
-strategy_router = ResponseStrategyRouter()
-
-SESSION_ID = str(uuid.uuid4())
-
-logging.info("AI Support System Ready")
-
-while True:
     try:
-        user_input = input("\nCustomer : ").strip()
-        if user_input.lower() in {"exit", "quit", "q"}:
-            break
-        if not user_input:
-            continue
+        source = DataSource(DATA_PATH)
+        raw_documents = source.load()
 
-        query_data = query_processor.invoke(user_input)
+        preprocessor = Preprocessor(chunk_size=900, chunk_overlap=200)
+        embedder = Embedder(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        enricher = MetadataEnricher(default_source="training_data")
 
-        human_features = HumanFeatureExtractor.extract(
-            query=query_data["clean_text"],
-            session_id=SESSION_ID,
+        ingestion_manager = IngestionManager(
+            preprocessor=preprocessor,
+            embedder=embedder,
+            metadata_enricher=enricher,
         )
 
-        intent_data = intent_classifier.classify(query_data["clean_text"])
+        processed_docs, embeddings = ingestion_manager.ingest_documents(raw_documents)
 
-        if intent_data.get("intent") == "greeting":
-            logging.info("Jessica: Hi! How can I help you today?\n")
-            continue
+        vectors = np.atleast_2d(np.array(embeddings, dtype="float32"))
+        metadata = [doc.metadata for doc in processed_docs]
+        chunks = [doc.page_content for doc in processed_docs]
 
-        intent_features = intent_feature_extractor.extract(
-            query=query_data["clean_text"],
-            previous_context={
-                "intent_topic": human_features.get("previous_topic"),
-                "question_type": human_features.get("previous_intent"),
-            },
-        )
-
-        features = {
-            **query_data,
-            **intent_data,
-            **intent_features,
-            **human_features,
-        }
-
-        system_prompt = strategy_router.select(features)
-
-        retrieval = retriever.retrieve(
-            query=query_data["clean_text"],
-            top_k=5,
-        )
-
-        if not retrieval:
-            logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
-            continue
-
-        context_text = context_assembler.assemble(
-            retrieval=retrieval,
-            intent=features.get("intent"),
-        )
-
-        answer = generator.generate(
-            {
-                "query": user_input,
-                "context": context_text,
-                "system_prompt": system_prompt,
-                "intent": features.get("intent"),
-                "emotion": features.get("emotion"),
-                "urgency": features.get("urgency"),
-                "follow_up": features.get("follow_up", False),
-            }
-        )
-
-        validation = validator.invoke(
-            {
-                "answer": answer,
-                "intent": features.get("intent"),
-                "emotion": features.get("emotion"),
-                "similarity": 1.0,
-            }
-        )
-
-        if validation["confidence"] < 0.5:
-            logging.info("Jessica: I’m not fully sure. Could you please clarify?\n")
-        else:
-            logging.info("Jessica: %s\n", answer)
-
-        logging.info("confidence : %s", validation["confidence"])
-
+        index = FAISSIndex(vectors, chunks, metadata)
+        return index, embedder
     except Exception as e:
-        logging.error("System Error: %s", e)
+        raise RuntimeError(f"Initialization failed: {e}")
+
+
+try:
+    print("\nInitializing AI Support System...\n")
+    faiss_index, embedder = initialize_system()
+    print("\nInitialization Complete.\n")
+
+    query_processor = QueryPreprocessor()
+    query_embedder = QueryEmbedder(embedder)
+    context_assembler = ContextAssembler()
+    retriever = RetrievalRouter(query_embedder, faiss_index)
+
+    intent_classifier = IntentClassifier(
+        model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    )
+    intent_feature_extractor = IntentFeaturesExtractor()
+
+    generator = ResponseGenerator()
+    validator = AnswerValidator()
+    strategy_router = ResponseStrategyRouter()
+
+    SESSION_ID = str(uuid.uuid4())
+
+    print("AI Support System Ready\n")
+
+    while True:
+        try:
+            user_input = input("\nCustomer : ").strip()
+            if user_input.lower() in {"exit", "quit", "q"}:
+                break
+            if not user_input:
+                continue
+
+            query_data = query_processor.invoke(user_input)
+
+            human_features = HumanFeatureExtractor.extract(
+                query=query_data["clean_text"],
+                session_id=SESSION_ID,
+            )
+
+            intent_data = intent_classifier.classify(query_data["clean_text"])
+
+            if intent_data.get("intent") == "greeting":
+                print("Jessica: Hi! How can I help you today?\n")
+                continue
+
+            intent_features = intent_feature_extractor.extract(
+                query=query_data["clean_text"],
+                previous_context={
+                    "intent_topic": human_features.get("previous_topic"),
+                    "question_type": human_features.get("previous_intent"),
+                },
+            )
+
+            features = {
+                **query_data,
+                **intent_data,
+                **intent_features,
+                **human_features,
+            }
+
+            system_prompt = strategy_router.select(features)
+
+            retrieval = retriever.retrieve(
+                query=query_data["clean_text"],
+                top_k=5,
+            )
+
+            if not retrieval:
+                print("Jessica: I’m not fully sure. Could you please clarify?\n")
+                continue
+
+            context_text = context_assembler.assemble(
+                retrieval=retrieval,
+                intent=features.get("intent"),
+            )
+
+            answer = generator.generate(
+                {
+                    "query": user_input,
+                    "context": context_text,
+                    "system_prompt": system_prompt,
+                    "intent": features.get("intent"),
+                    "emotion": features.get("emotion"),
+                    "urgency": features.get("urgency"),
+                    "follow_up": features.get("follow_up", False),
+                }
+            )
+
+            validation = validator.invoke(
+                {
+                    "answer": answer,
+                    "intent": features.get("intent"),
+                    "emotion": features.get("emotion"),
+                    "similarity": 1.0,
+                }
+            )
+
+            if validation["confidence"] < 0.5:
+                print("Jessica: I’m not fully sure. Could you please clarify?\n")
+            else:
+                print(f"Jessica: {answer}\n")
+
+            print(f"confidence : {validation['confidence']}")
+
+        except Exception as e:
+            print(f"Runtime Error: {e}")
+
+except Exception as e:
+    print(f"Fatal Error: {e}")

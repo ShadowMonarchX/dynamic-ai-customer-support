@@ -1,10 +1,8 @@
-import threading
 from typing import Dict, Any
 from langdetect import detect, DetectorFactory
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_ollama import OllamaLLM
-import logging
 import re
 
 DetectorFactory.seed = 0
@@ -44,13 +42,9 @@ CONFIDENCE_THRESHOLD = 0.6
 
 GREETING_REGEX = re.compile(r"^(hi+|hello+|hey+|yo+|hmm+|woo+|yay+)$", re.IGNORECASE)
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("IntentClassifier")
-
 
 class IntentClassifier:
     def __init__(self, model_name: str = "mistral"):
-        self._lock = threading.Lock()
         self.llm = OllamaLLM(model=model_name, temperature=0.2, num_predict=128)
         self.parser = JsonOutputParser()
         self.prompt = PromptTemplate(
@@ -72,7 +66,6 @@ User message: "{message}"
     def _apply_basic_rules(self, text: str) -> Dict[str, Any]:
         lowered = text.lower().strip()
 
-        
         if GREETING_REGEX.fullmatch(lowered):
             return {
                 "intent": "greeting",
@@ -82,7 +75,6 @@ User message: "{message}"
                 "confidence": 0.99,
             }
 
-        #  Identity lookup
         if lowered.startswith("who is") or lowered.startswith("what is"):
             return {
                 "intent": "identity",
@@ -134,17 +126,17 @@ User message: "{message}"
         }
 
     def classify(self, message: str) -> Dict[str, Any]:
-        with self._lock:
-            result = {
-                "intent": "unknown",
-                "emotion": "neutral",
-                "urgency": "low",
-                "complexity": "small",
-                "language": "unknown",
-                "sentiment_score": 0.0,
-                "confidence": 0.0,
-            }
+        result = {
+            "intent": "unknown",
+            "emotion": "neutral",
+            "urgency": "low",
+            "complexity": "small",
+            "language": "unknown",
+            "sentiment_score": 0.0,
+            "confidence": 0.0,
+        }
 
+        try:
             if not message or not message.strip():
                 return result
 
@@ -166,7 +158,6 @@ User message: "{message}"
             if result["intent"] not in INTENTS:
                 result["intent"] = "unknown"
 
-            logger.info(
-                f"Detected intent: {result['intent']}, confidence: {result['confidence']}"
-            )
+            return result
+        except Exception:
             return result
