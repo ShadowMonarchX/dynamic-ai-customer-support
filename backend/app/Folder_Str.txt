@@ -1,4 +1,4 @@
-Root Directory
+backend in app folder Root Directory
 main.py (The entry point that connects the offline and online timelines)
 
 __init__.py
@@ -71,3 +71,4 @@ answer_validator.py (Ensures the AI isn't making things up)
 
 __init__.py
 
+app/main.py
