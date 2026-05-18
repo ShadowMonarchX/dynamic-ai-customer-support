@@ -211,3 +211,8 @@ __marimo__/
 
 .github/
 deploy/
+
+# packeg
+
+uv.lock
+pyproject.toml
