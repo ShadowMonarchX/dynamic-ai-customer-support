@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      REDIS_ENABLED: "true"
+      SECRET_KEY: dev-secret-key-minimum-length-32!!
+      RATE_LIMIT: 60/minute
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    command: celery -A backend.app.workers.celery_app.celery_app worker --loglevel=info
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      REDIS_ENABLED: "true"
+      SECRET_KEY: dev-secret-key-minimum-length-32!!
+    depends_on:
+      - redis
+
+  prometheus:
+    image: prom/prometheus:v3.7.0
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api

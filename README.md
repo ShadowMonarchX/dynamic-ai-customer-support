@@ -1,234 +1,112 @@
-# 🧠 Dynamic AI Customer Support Backend
+# Dynamic AI Customer Support (Production Backend)
 
-An end-to-end **AI-powered customer support backend** built with **FastAPI**, combining **offline ingestion**, **vector search (FAISS)**, **intent detection**, **human feature extraction**, **LLM reasoning**, and **response strategy selection**.
+Async-first, secure, and production-ready AI customer support backend built with FastAPI.
 
-This system is designed using **clean modular architecture**, separating **offline processing** and **online query execution** for scalability and maintainability.
+## Highlights
+- JWT auth with refresh tokens and RBAC
+- Rate limiting and body-size protection
+- Correlation IDs + structured JSON logging
+- Redis-backed cache and session isolation with TTL
+- Grounded retrieval + reranking + confidence validation
+- Streaming response endpoint
+- Offline ingestion worker with persisted vector artifacts
+- Prometheus metrics endpoint
 
----
-
-## 🚀 Key Features
-
-* 🔹 Offline document ingestion & preprocessing
-* 🔹 Chunking + embeddings using Sentence Transformers
-* 🔹 FAISS-based vector similarity search
-* 🔹 Intent & emotion detection
-* 🔹 Human behavior feature extraction
-* 🔹 Context-aware retrieval routing
-* 🔹 LLM-powered response generation
-* 🔹 Answer validation to reduce hallucinations
-* 🔹 Strategy-based response selection
-* 🔹 FastAPI REST interface
-
----
-
-## 🏗️ System Architecture Overview
-
-### Offline Timeline (One-Time / Batch Process)
-
-1. Load raw text data
-2. Clean & preprocess documents
-3. Chunk large documents
-4. Generate embeddings
-5. Enrich metadata
-6. Store vectors in FAISS index
-
-### Online Timeline (Per User Query)
-
-1. Preprocess user query
-2. Extract human behavior features
-3. Detect intent & emotion
-4. Route retrieval strategy
-5. Retrieve relevant chunks
-6. Assemble contextual prompt
-7. Generate response using LLM
-8. Validate answer confidence
-9. Return final response
-
----
-
-## 📁 Project Structure
+## Architecture
 
 ```text
-backend/
-├── app/
-│   ├── main.py                # Application entry point
-│   ├── __init__.py
-│
-│   ├── ingestion/             # Offline ingestion pipeline
-│   │   ├── data_load.py
-│   │   ├── preprocessing.py
-│   │   ├── embedding.py
-│   │   ├── metadata_enricher.py
-│   │   ├── ingestion_manager.py
-│   │   ├── run_preprocessing.py
-│   │   └── __init__.py
-│
-│   ├── intent_detection/      # Intent & emotion detection
-│   │   ├── intent_classifier.py
-│   │   ├── intent_features.py
-│   │   └── __init__.py
-│
-│   ├── query_pipeline/        # Online query processing
-│   │   ├── query_preprocess.py
-│   │   ├── human_features.py
-│   │   ├── query_embed.py
-│   │   ├── context_assembler.py
-│   │   ├── retrieval_router.py
-│   │   └── __init__.py
-│
-│   ├── vector_store/           # Vector storage layer
-│   │   ├── faiss_index.py
-│   │   └── __init__.py
-│
-│   ├── reasoning/              # LLM reasoning
-│   │   ├── llm_reasoner.py
-│   │   ├── response_generator.py
-│   │   └── __init__.py
-│
-│   ├── response_strategy/      # Response style selection
-│   │   ├── response_router.py
-│   │   ├── response_strategy.py
-│   │   └── __init__.py
-│
-│   ├── validation/             # Answer validation
-│   │   ├── answer_validator.py
-│   │   └── __init__.py
-│
-│   └── data/
-│       └── training_data.txt   # Knowledge base
+backend/app/
+├── api/
+│   └── v1/
+├── core/
+├── services/
+├── domain/
+├── infrastructure/
+├── models/
+├── schemas/
+├── repositories/
+├── middleware/
+├── workers/
+├── observability/
+└── tests/
 ```
 
----
+Legacy prototype code is preserved under `experiments/legacy_backend/`.
 
-## 🧩 Core Components Explained
+## Environment
 
-### 🔹 Ingestion Pipeline (`ingestion/`)
+Configure `.env` (defaults included for local development):
 
-Handles offline data preparation:
+- `SECRET_KEY` (required, >=32 chars)
+- `DATA_PATH`
+- `VECTOR_ARTIFACT_PATH`
+- `REDIS_URL`
+- `RATE_LIMIT`
+- `VECTOR_BACKEND` (`inmemory|faiss|pgvector|pinecone|weaviate`)
 
-* Reads large text files
-* Cleans & chunks content
-* Generates embeddings
-* Enriches metadata
-* Prepares data for vector storage
-
-### 🔹 Intent Detection (`intent_detection/`)
-
-Detects:
-
-* User intent (greeting, question, complaint, etc.)
-* Emotional tone (angry, neutral, urgent)
-
-### 🔹 Query Pipeline (`query_pipeline/`)
-
-Online query execution:
-
-* Cleans user input
-* Extracts human behavioral features
-* Embeds queries
-* Retrieves relevant context
-
-### 🔹 Vector Store (`vector_store/`)
-
-* FAISS-based similarity search
-* Efficient nearest-neighbor lookup
-
-### 🔹 Reasoning Engine (`reasoning/`)
-
-* Uses LLM to generate answers from retrieved context
-* Applies system prompts dynamically
-
-### 🔹 Response Strategy (`response_strategy/`)
-
-* Chooses response tone (polite, empathetic, concise, etc.)
-* Adjusts based on intent & emotion
-
-### 🔹 Validation (`validation/`)
-
-* Ensures answers are grounded in context
-* Reduces hallucinations via confidence scoring
-
----
-
-## ⚙️ Tech Stack
-
-* **Backend Framework:** FastAPI
-* **Embeddings:** Sentence Transformers (`all-MiniLM-L6-v2`)
-* **Vector Search:** FAISS
-* **LLM:** TinyLlama 1.1B Chat
-* **Data Processing:** NumPy
-* **API Schema:** Pydantic
-
----
-
-## ▶️ Running the Application
-
-### 1️⃣ Install Dependencies
+## Run
 
 ```bash
-pip install -r requirements.txt
+uv sync
+uv run uvicorn backend.app.main:app --reload
 ```
 
-### 2️⃣ Set Training Data Path
+## Authentication
 
-Update in `app/main.py`:
-
-```python
-DATA_PATH = "/path/to/training_data.txt"
-```
-
-### 3️⃣ Start the Server
+1. Get token:
 
 ```bash
-uvicorn app.main:app --reload
+curl -X POST http://127.0.0.1:8000/api/v1/auth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin&password=admin123"
 ```
 
-### 4️⃣ API Endpoints
+2. Query:
 
-* **Health Check**
-
-```http
-GET /
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/query \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"user_query":"How can I contact support?"}'
 ```
 
-* **Query Chatbot**
+3. Stream query:
 
-```http
-POST /query
-Content-Type: application/json
-
-{
-  "user_query": "How do I reset my password?"
-}
+```bash
+curl -N -X POST http://127.0.0.1:8000/api/v1/query/stream \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"user_query":"Who is Nayan Raval?"}'
 ```
 
----
+## Workers
 
-## 🧪 Example Response Flow
+Rebuild artifacts (offline ingestion job):
 
-1. User sends a query
-2. Intent + emotion detected
-3. Context retrieved from FAISS
-4. LLM generates response
-5. Validator checks confidence
-6. Final answer returned
+```bash
+uv run python -m backend.app.workers.run_ingestion
+```
 
----
+Celery task worker:
 
-## 📌 Future Improvements
+```bash
+uv run celery -A backend.app.workers.celery_app.celery_app worker --loglevel=info
+```
 
-* Streaming responses
-* Multi-language support
-* Persistent session memory
-* Redis-based caching
-* Async ingestion
-* Hybrid search (BM25 + vectors)
+## Metrics
 
----
+- Prometheus scrape endpoint: `GET /metrics`
+- Health endpoint: `GET /api/v1/health`
 
-## 👨‍💻 Author
+## Testing
 
-**Jenish Shekhada**
-AI Engineer | GenAI | RAG Systems | FastAPI
+```bash
+uv run pytest -q
+```
 
+Coverage gate: `>= 80%`
 
+## DevOps
+- Dockerfile + docker-compose included
+- GitHub Actions CI pipeline included
+- Kubernetes manifests + Helm chart templates included
