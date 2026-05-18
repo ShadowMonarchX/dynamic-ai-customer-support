@@ -1,10 +1,5 @@
-"""
-app package
+"""Dynamic AI Customer Support application package."""
 
-Main application package containing:
-- data ingestion
-- vector storage
-- query processing pipeline
-"""
+from backend.app.main import app, create_app
 
-__all__ = ["ingestion", "vector_store", "query_pipeline", "response_strategy", "reasoning", "validation", "intent_detection"]
+__all__ = ["app", "create_app"]
